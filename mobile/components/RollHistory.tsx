@@ -70,7 +70,7 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
             <View key={roll.id} style={styles.listItem}>
               <View style={styles.listItemHeader}>
                 <Text style={styles.listItemTitle} numberOfLines={1}>
-                  {roll.configurationName}
+                  {formatTime(roll.timestamp)}
                 </Text>
                 <View style={[styles.totalContainer, { minWidth: 'auto', paddingHorizontal: 12, paddingVertical: 4 }]}>
                   <Text style={[styles.totalValue, { fontSize: 20 }]}>
@@ -101,7 +101,7 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
               </View>
               
               <Text style={styles.listItemMeta}>
-                {formatTime(roll.timestamp)}
+                {roll.configurationName}
               </Text>
             </View>
           ))}

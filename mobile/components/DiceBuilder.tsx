@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, ScrollView, Alert, Pressable } from 'react-native';
+import { View, Text, TextInput, ScrollView, Alert, Pressable, Modal } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { Die, DICE_TYPES, RollResult } from '../shared/types';
 import { formatDiceConfiguration, validateDiceConfiguration } from '../shared/utils';
@@ -15,6 +15,7 @@ interface DiceBuilderProps {
 export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRoll, loadedConfiguration }) => {
   const [dice, setDice] = useState<Die[]>(loadedConfiguration || []);
   const [configName, setConfigName] = useState('');
+  const [showSaveModal, setShowSaveModal] = useState(false);
 
   useEffect(() => {
     if (loadedConfiguration) {
@@ -48,19 +49,23 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
     );
   };
 
+  const openSaveModal = () => {
+    if (!validateDiceConfiguration(dice)) {
+      Alert.alert('Invalid Configuration', 'Please add at least one die to save');
+      return;
+    }
+    setShowSaveModal(true);
+  };
+
   const handleSave = () => {
     if (!configName.trim()) {
       Alert.alert('Missing Name', 'Please enter a configuration name');
       return;
     }
-    
-    if (!validateDiceConfiguration(dice)) {
-      Alert.alert('Invalid Configuration', 'Please add at least one die');
-      return;
-    }
 
     onSave(configName.trim(), dice);
     setConfigName(''); // Only clear the name, keep the dice configuration
+    setShowSaveModal(false);
     Alert.alert('Success', 'Configuration saved!');
   };
 
@@ -102,11 +107,11 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
 
         {lastRoll && (
           <View style={[styles.preview, { marginBottom: 0 }]}>
-            <View style={[styles.row, styles.spaceBetween, { marginBottom: 8 }]}>
-              <Text style={[styles.previewText, { flex: 1 }]}>
-                {lastRoll.configurationName}
+            <View style={[styles.row, { marginBottom: 8, alignItems: 'center' }]}>
+              <Text style={[styles.previewText, { fontWeight: '600', color: colors.textSecondary }]}>
+                TOTAL
               </Text>
-              <Text style={[styles.totalValue, { fontSize: 24, marginLeft: 16 }]}>
+              <Text style={[styles.totalValue, { fontSize: 32, marginLeft: 16, fontWeight: 'bold' }]}>
                 {lastRoll.total}
               </Text>
             </View>
@@ -129,72 +134,54 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
         )}
       </View>
 
-      {/* Middle Section - Save Configuration */}
-      <View style={[styles.card, { margin: 16, marginTop: 8, marginBottom: 8 }]}>
-        <Text style={styles.inputLabel}>Save Configuration</Text>
-        <View style={[styles.row, { gap: 12 }]}>
-          <TextInput
-            style={[
-              styles.textInput,
-              styles.flex1,
-              focusedInput === 'configName' && styles.textInputFocused,
-            ]}
-            placeholder="Enter configuration name..."
-            placeholderTextColor={colors.textLight}
-            value={configName}
-            onChangeText={setConfigName}
-            onFocus={() => setFocusedInput('configName')}
-            onBlur={() => setFocusedInput(null)}
-            returnKeyType="done"
-            onSubmitEditing={handleSave}
-          />
-          
-          <Pressable
-            style={({ pressed }) => [
-              styles.button,
-              styles.successButton,
-              (!isValid || !configName.trim()) && styles.disabledButton,
-              pressed && isValid && configName.trim() && styles.successButtonPressed,
-              { paddingHorizontal: 20 }
-            ]}
-            onPress={handleSave}
-            disabled={!isValid || !configName.trim()}
-          >
-            <Text style={styles.buttonText}>💾</Text>
-          </Pressable>
-        </View>
-      </View>
 
       {/* Bottom Section - Dice Configuration */}
       <View style={[styles.card, { margin: 16, marginTop: 8 }]}>
-        <View style={[styles.row, styles.spaceBetween, { marginBottom: 16 }]}>
-          <Text style={styles.sectionTitle}>Dice Configuration</Text>
-          <View style={[styles.row, { gap: 8 }]}>
-            {dice.length > 0 && (
-              <Pressable
-                style={({ pressed }) => [
-                  styles.button,
-                  styles.smallButton,
-                  styles.dangerButton,
-                  pressed && styles.dangerButtonPressed,
-                ]}
-                onPress={clearConfiguration}
-              >
-                <Text style={styles.smallButtonText}>Clear</Text>
-              </Pressable>
-            )}
+        <Text style={[styles.sectionTitle, { marginBottom: 12 }]}>Dice Configuration</Text>
+        
+        <View style={[styles.row, { gap: 8, marginBottom: 16 }]}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.button,
+              styles.smallButton,
+              styles.successButton,
+              !isValid && styles.disabledButton,
+              pressed && isValid && styles.successButtonPressed,
+              { flex: 1 }
+            ]}
+            onPress={openSaveModal}
+            disabled={!isValid}
+          >
+            <Text style={styles.smallButtonText}>Save</Text>
+          </Pressable>
+          
+          {dice.length > 0 && (
             <Pressable
               style={({ pressed }) => [
                 styles.button,
                 styles.smallButton,
-                styles.successButton,
-                pressed && styles.successButtonPressed,
+                styles.dangerButton,
+                pressed && styles.dangerButtonPressed,
+                { flex: 1 }
               ]}
-              onPress={addDie}
+              onPress={clearConfiguration}
             >
-              <Text style={styles.smallButtonText}>+ Add</Text>
+              <Text style={styles.smallButtonText}>Clear</Text>
             </Pressable>
-          </View>
+          )}
+          
+          <Pressable
+            style={({ pressed }) => [
+              styles.button,
+              styles.smallButton,
+              styles.successButton,
+              pressed && styles.successButtonPressed,
+              { flex: 1 }
+            ]}
+            onPress={addDie}
+          >
+            <Text style={styles.smallButtonText}>+ Add</Text>
+          </Pressable>
         </View>
 
         {dice.length === 0 ? (
@@ -298,7 +285,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
                       ]}
                       onPress={() => removeDie(index)}
                     >
-                      <Text style={[styles.smallButtonText, { fontSize: 16 }]}>🗑️</Text>
+                      <Text style={[styles.smallButtonText, { fontSize: 16, color: 'white' }]}>×</Text>
                     </Pressable>
                   </View>
                 </View>
@@ -307,6 +294,69 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
           </>
         )}
       </View>
+      
+      {/* Save Configuration Modal */}
+      <Modal
+        visible={showSaveModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowSaveModal(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={[styles.card, { width: '100%', maxWidth: 400 }]}>
+            <Text style={[styles.sectionTitle, { marginBottom: 16, textAlign: 'center' }]}>Save Configuration</Text>
+            
+            <TextInput
+              style={[
+                styles.textInput,
+                focusedInput === 'configName' && styles.textInputFocused,
+                { marginBottom: 20 }
+              ]}
+              placeholder="Enter configuration name..."
+              placeholderTextColor={colors.textLight}
+              value={configName}
+              onChangeText={setConfigName}
+              onFocus={() => setFocusedInput('configName')}
+              onBlur={() => setFocusedInput(null)}
+              returnKeyType="done"
+              onSubmitEditing={handleSave}
+              autoFocus={true}
+            />
+            
+            <View style={[styles.row, { gap: 12 }]}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.button,
+                  styles.smallButton,
+                  { flex: 1, backgroundColor: colors.textLight },
+                  pressed && { backgroundColor: colors.border }
+                ]}
+                onPress={() => {
+                  setShowSaveModal(false);
+                  setConfigName('');
+                }}
+              >
+                <Text style={[styles.smallButtonText, { color: 'white' }]}>Cancel</Text>
+              </Pressable>
+              
+              <Pressable
+                style={({ pressed }) => [
+                  styles.button,
+                  styles.smallButton,
+                  styles.successButton,
+                  !configName.trim() && styles.disabledButton,
+                  pressed && configName.trim() && styles.successButtonPressed,
+                  { flex: 1 }
+                ]}
+                onPress={handleSave}
+                disabled={!configName.trim()}
+              >
+                <Text style={styles.smallButtonText}>Save</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };

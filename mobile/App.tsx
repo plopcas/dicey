@@ -86,7 +86,7 @@ const App: React.FC = () => {
           createdAt: new Date(),
         };
         result = mobileDiceService.rollDice(tempConfig);
-        setLoadedConfiguration(null); // Clear any loaded config when rolling from builder
+        // Keep the current configuration when rolling from builder
       }
       
       console.log('Roll result:', result);
