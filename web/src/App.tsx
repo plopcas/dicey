@@ -6,12 +6,14 @@ import { SavedConfigurations } from './components/SavedConfigurations';
 import { RollResult as RollResultComponent } from './components/RollResult';
 import { RollHistory } from './components/RollHistory';
 import { Statistics } from './components/Statistics';
+import { SettingsProvider, useSettings } from './contexts/SettingsContext';
 import { validateDiceConfiguration } from './shared/utils';
 import './App.css';
 
 type Tab = 'builder' | 'saved' | 'history' | 'statistics';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const { soundEnabled, modifiersEnabled, setSoundEnabled, setModifiersEnabled } = useSettings();
   const [activeTab, setActiveTab] = useState<Tab>('builder');
   const [configurations, setConfigurations] = useState<DiceConfiguration[]>([]);
   const [rollHistory, setRollHistory] = useState<RollResult[]>([]);
@@ -19,6 +21,7 @@ const App: React.FC = () => {
   const [currentDice, setCurrentDice] = useState<Die[]>([]);
   const [loading, setLoading] = useState(true);
   const [isRolling, setIsRolling] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -57,6 +60,7 @@ const App: React.FC = () => {
 
   // Create dice roll sound effect
   const playDiceSound = () => {
+    if (!soundEnabled) return;
     try {
       const audio = new Audio('/dice-142528.mp3');
       audio.volume = 0.5;
@@ -100,7 +104,7 @@ const App: React.FC = () => {
       
       if ('id' in dice) {
         // Rolling a saved configuration - switch to builder tab to show result
-        result = await diceService.rollDice(dice);
+        result = await diceService.rollDice(dice, modifiersEnabled);
         setCurrentDice(dice.dice); // Load the dice configuration
         setActiveTab('builder');
       } else {
@@ -111,7 +115,7 @@ const App: React.FC = () => {
           dice,
           createdAt: new Date(),
         };
-        result = await diceService.rollDice(tempConfig);
+        result = await diceService.rollDice(tempConfig, modifiersEnabled);
         setCurrentDice(dice); // Update current dice state
       }
       
@@ -138,8 +142,29 @@ const App: React.FC = () => {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>🎲 Dicey</h1>
-        <p>Your digital dice rolling companion</p>
+        <div style={{ position: 'relative', width: '100%' }}>
+          <div style={{ textAlign: 'center' }}>
+            <h1>🎲 Dicey</h1>
+            <p>Your digital dice rolling companion</p>
+          </div>
+          <button 
+            className="settings-gear"
+            onClick={() => setShowSettings(!showSettings)}
+            style={{
+              position: 'absolute',
+              top: '0',
+              right: '0',
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              fontSize: '24px',
+              cursor: 'pointer',
+              padding: '8px'
+            }}
+          >
+            ⚙
+          </button>
+        </div>
       </header>
 
       <nav className="app-nav">
@@ -210,7 +235,57 @@ const App: React.FC = () => {
           </div>
         )}
       </main>
+      
+      {/* Settings Dropdown */}
+      {showSettings && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: '80px',
+            right: '20px',
+            backgroundColor: 'white',
+            border: '1px solid #ddd',
+            borderRadius: '8px',
+            padding: '16px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            zIndex: 1000,
+            minWidth: '200px'
+          }}
+        >
+          <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Settings</h3>
+          
+          <div style={{ marginBottom: '12px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+              <input 
+                type="checkbox" 
+                checked={soundEnabled} 
+                onChange={(e) => setSoundEnabled(e.target.checked)}
+              />
+              Sound effects
+            </label>
+          </div>
+          
+          <div style={{ marginBottom: '12px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+              <input 
+                type="checkbox" 
+                checked={modifiersEnabled} 
+                onChange={(e) => setModifiersEnabled(e.target.checked)}
+              />
+              Modifiers
+            </label>
+          </div>
+        </div>
+      )}
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <SettingsProvider>
+      <AppContent />
+    </SettingsProvider>
   );
 };
 

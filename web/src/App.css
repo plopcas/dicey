@@ -438,6 +438,7 @@ body {
   gap: 1rem;
   flex-wrap: wrap;
   margin-bottom: 1rem;
+  justify-content: center;
 }
 
 .die-group-results {

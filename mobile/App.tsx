@@ -120,7 +120,7 @@ const AppContent: React.FC = () => {
       
       if ('id' in dice) {
         // Rolling a saved configuration - navigate to builder tab to show result
-        result = await mobileDiceService.rollDice(dice);
+        result = await mobileDiceService.rollDice(dice, settings.modifiersEnabled);
         setCurrentDice(dice.dice); // Load the dice configuration
         setActiveTab('builder');
       } else {
@@ -131,7 +131,7 @@ const AppContent: React.FC = () => {
           dice,
           createdAt: new Date(),
         };
-        result = await mobileDiceService.rollDice(tempConfig);
+        result = await mobileDiceService.rollDice(tempConfig, settings.modifiersEnabled);
         setCurrentDice(dice); // Update current dice state
       }
       

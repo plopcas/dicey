@@ -16,7 +16,7 @@ export const SavedConfigurations: React.FC<SavedConfigurationsProps> = ({
   if (configurations.length === 0) {
     return (
       <div className="saved-configurations empty">
-        <h2>Saved Configurations</h2>
+        <h2>Saved configurations</h2>
         <p>No saved configurations yet. Create one using the dice builder!</p>
       </div>
     );
@@ -24,7 +24,7 @@ export const SavedConfigurations: React.FC<SavedConfigurationsProps> = ({
 
   return (
     <div className="saved-configurations">
-      <h2>Saved Configurations</h2>
+      <h2>Saved configurations</h2>
       
       <div className="configurations-list">
         {configurations.map((config) => (

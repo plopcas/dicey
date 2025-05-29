@@ -15,7 +15,7 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
   if (history.length === 0) {
     return (
       <div className="roll-history empty">
-        <h2>Roll History</h2>
+        <h2>Roll history</h2>
         <p>📋</p>
         <p>No roll history yet</p>
         <p>Start rolling dice to see your history here.</p>
@@ -26,7 +26,7 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
   return (
     <div className="roll-history">
       <div className="history-header">
-        <h2>Roll History ({history.length})</h2>
+        <h2>Roll history ({history.length})</h2>
         <button 
           onClick={() => {
             if (window.confirm('Are you sure you want to clear all roll history?')) {
@@ -35,7 +35,7 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
           }}
           className="btn btn-danger"
         >
-          Clear All
+          Clear all
         </button>
       </div>
 

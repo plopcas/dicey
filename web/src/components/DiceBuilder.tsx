@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Die, DICE_TYPES } from '../shared/types';
 import { formatDiceConfiguration, validateDiceConfiguration } from '../shared/utils';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface DiceBuilderProps {
   onSave: (name: string, dice: Die[]) => void;
@@ -10,6 +11,7 @@ interface DiceBuilderProps {
 }
 
 export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, currentDice, onDiceChange }) => {
+  const { modifiersEnabled } = useSettings();
   const [configName, setConfigName] = useState('');
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showCustomDieModal, setShowCustomDieModal] = useState(false);
@@ -85,7 +87,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, curren
 
   return (
     <div className="dice-builder">
-      <h2>Dice Configuration</h2>
+      <h2>Dice configuration</h2>
       
       <div className="actions">
         <div className="button-group">
@@ -122,8 +124,8 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, curren
           <>
             <div className="dice-table-header">
               <span>Qty</span>
-              <span>Die Type</span>
-              <span>Modifier</span>
+              <span>Die type</span>
+              {modifiersEnabled && <span>Modifier</span>}
               <span>Action</span>
             </div>
             {currentDice.map((die, index) => (
@@ -150,44 +152,46 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, curren
                   )}
                 </select>
                 
-                <input
-                  type="text"
-                  value={modifierInputs[index] !== undefined ? modifierInputs[index] : (die.modifier || 0).toString()}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setModifierInputs({ ...modifierInputs, [index]: value });
-                    
-                    // Update the die if it's a valid number or empty
-                    if (value === '' || value === '-') {
-                      updateDie(index, { modifier: 0 });
-                    } else {
-                      const num = parseInt(value);
-                      if (!isNaN(num) && num >= -99 && num <= 99) {
-                        updateDie(index, { modifier: num });
+                {modifiersEnabled && (
+                  <input
+                    type="text"
+                    value={modifierInputs[index] !== undefined ? modifierInputs[index] : (die.modifier || 0).toString()}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setModifierInputs({ ...modifierInputs, [index]: value });
+                      
+                      // Update the die if it's a valid number or empty
+                      if (value === '' || value === '-') {
+                        updateDie(index, { modifier: 0 });
+                      } else {
+                        const num = parseInt(value);
+                        if (!isNaN(num) && num >= -99 && num <= 99) {
+                          updateDie(index, { modifier: num });
+                        }
                       }
-                    }
-                  }}
-                  onFocus={(e) => {
-                    // Clear the input if it shows 0
-                    if (die.modifier === 0) {
-                      setModifierInputs({ ...modifierInputs, [index]: '' });
-                    }
-                    e.target.select();
-                  }}
-                  onBlur={() => {
-                    // Clean up the input state and ensure we have a valid number
-                    const currentInput = modifierInputs[index];
-                    if (currentInput === '' || currentInput === undefined) {
-                      updateDie(index, { modifier: 0 });
-                    }
-                    const newInputs = { ...modifierInputs };
-                    delete newInputs[index];
-                    setModifierInputs(newInputs);
-                  }}
-                  placeholder="±0"
-                  title="Enter modifier value (positive or negative)"
-                  style={{ width: '80px', textAlign: 'center' }}
-                />
+                    }}
+                    onFocus={(e) => {
+                      // Clear the input if it shows 0
+                      if (die.modifier === 0) {
+                        setModifierInputs({ ...modifierInputs, [index]: '' });
+                      }
+                      e.target.select();
+                    }}
+                    onBlur={() => {
+                      // Clean up the input state and ensure we have a valid number
+                      const currentInput = modifierInputs[index];
+                      if (currentInput === '' || currentInput === undefined) {
+                        updateDie(index, { modifier: 0 });
+                      }
+                      const newInputs = { ...modifierInputs };
+                      delete newInputs[index];
+                      setModifierInputs(newInputs);
+                    }}
+                    placeholder="±0"
+                    title="Enter modifier value (positive or negative)"
+                    style={{ width: '100%', textAlign: 'center' }}
+                  />
+                )}
                 
                 <button onClick={() => removeDie(index)} className="remove-btn">
                   ×
@@ -202,7 +206,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, curren
       {showSaveModal && (
         <div className="modal-overlay" onClick={() => setShowSaveModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Save Configuration</h3>
+            <h3>Save configuration</h3>
             <input
               type="text"
               placeholder="Enter configuration name..."
@@ -236,7 +240,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, curren
       {showCustomDieModal && (
         <div className="modal-overlay" onClick={() => setShowCustomDieModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Custom Die</h3>
+            <h3>Custom die</h3>
             <p>How many faces does this die have?</p>
             <input
               type="number"

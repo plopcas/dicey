@@ -19,7 +19,7 @@ export const rollSingleDie = (sides: number): number => {
   return getSecureRandom(sides);
 };
 
-export const rollDice = (configuration: DiceConfiguration): RollResult => {
+export const rollDice = (configuration: DiceConfiguration, modifiersEnabled: boolean = true): RollResult => {
   const results: number[][] = [];
   const modifiers: number[] = [];
   let total = 0;
@@ -33,8 +33,8 @@ export const rollDice = (configuration: DiceConfiguration): RollResult => {
     }
     results.push(dieResults);
     
-    // Track modifier for this die group
-    const modifier = die.modifier || 0;
+    // Track modifier for this die group - but only apply if modifiers are enabled
+    const modifier = modifiersEnabled ? (die.modifier || 0) : 0;
     modifiers.push(modifier);
     total += modifier;
   });

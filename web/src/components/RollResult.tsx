@@ -1,6 +1,7 @@
 import React from 'react';
 import { RollResult as RollResultType, Die } from '../shared/types';
 import { validateDiceConfiguration } from '../shared/utils';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface RollResultProps {
   result: RollResultType | null;
@@ -10,6 +11,7 @@ interface RollResultProps {
 }
 
 export const RollResult: React.FC<RollResultProps> = ({ result, onRoll, currentDice, isRolling }) => {
+  const { modifiersEnabled } = useSettings();
   const isValid = validateDiceConfiguration(currentDice);
 
   const handleRoll = () => {
@@ -25,13 +27,13 @@ export const RollResult: React.FC<RollResultProps> = ({ result, onRoll, currentD
         disabled={!isValid || isRolling}
         className={`roll-btn primary ${isRolling ? 'rolling' : ''}`}
       >
-        {isRolling ? '🎲 Rolling...' : isValid ? '🎲 Roll Dice' : 'Add dice to roll'}
+        {isRolling ? 'Rolling...' : isValid ? 'Roll' : 'Add dice to roll'}
       </button>
 
       {result && (
         <>
           <div className="result-header">
-            <div className="total">TOTAL <span className="total-value">{result.total}</span></div>
+            <div className="total-value" style={{ fontSize: '4rem', textAlign: 'center' }}>{result.total}</div>
           </div>
 
           <div className="dice-results">
@@ -39,7 +41,7 @@ export const RollResult: React.FC<RollResultProps> = ({ result, onRoll, currentD
               <div key={dieIndex} className="die-group-results">
                 {dieGroup.map((roll, rollIndex) => {
                   const modifier = result.modifiers[dieIndex];
-                  const hasModifier = modifier !== 0;
+                  const hasModifier = modifiersEnabled && modifier !== 0;
                   const modifiedTotal = roll + modifier;
                   
                   if (hasModifier) {

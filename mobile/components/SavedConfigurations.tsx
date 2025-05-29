@@ -17,7 +17,7 @@ export const SavedConfigurations: React.FC<SavedConfigurationsProps> = ({
 }) => {
   const handleDelete = (config: DiceConfiguration) => {
     Alert.alert(
-      'Delete Configuration',
+      'Delete configuration',
       `Are you sure you want to delete "${config.name}"?`,
       [
         { text: 'Cancel', style: 'cancel' },
@@ -31,7 +31,7 @@ export const SavedConfigurations: React.FC<SavedConfigurationsProps> = ({
       <View style={styles.container}>
         <View style={[styles.emptyState, { marginHorizontal: 0 }]}>
           <Text style={styles.emptyStateIcon}>📋</Text>
-          <Text style={styles.emptyStateTitle}>No Saved Configurations</Text>
+          <Text style={styles.emptyStateTitle}>No saved configurations</Text>
           <Text style={styles.emptyStateText}>
             Create and save dice configurations in the Builder tab to see them here.
           </Text>
@@ -44,7 +44,7 @@ export const SavedConfigurations: React.FC<SavedConfigurationsProps> = ({
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       <View style={styles.content}>
         <Text style={styles.sectionTitle}>
-          Saved Configurations ({configurations.length})
+          Saved configurations ({configurations.length})
         </Text>
         
         <View style={styles.list}>

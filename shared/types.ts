@@ -1,6 +1,7 @@
 export interface Die {
   sides: number;
   quantity: number;
+  modifier?: number;
 }
 
 export interface DiceConfiguration {
@@ -31,5 +32,5 @@ export interface DiceRollService {
   clearHistory: () => void;
 }
 
-export const DICE_TYPES = [4, 6, 8, 10, 12, 20, 100] as const;
+export const DICE_TYPES = [4, 6, 8, 10, 12, 20, 100, -1] as const; // -1 represents custom
 export type DiceType = typeof DICE_TYPES[number];

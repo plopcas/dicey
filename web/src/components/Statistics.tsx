@@ -37,32 +37,32 @@ export const Statistics: React.FC<StatisticsProps> = ({ history }) => {
 
   return (
     <div className="statistics">
-      <h2>Roll Statistics</h2>
+      <h2>Roll statistics</h2>
       
       <div className="stats-grid">
         <div className="stat-card">
-          <h3>Total Rolls</h3>
+          <h3>Total rolls</h3>
           <div className="stat-value">{history.length}</div>
         </div>
         
         <div className="stat-card">
-          <h3>Average Total</h3>
+          <h3>Average total</h3>
           <div className="stat-value">{average.toFixed(1)}</div>
         </div>
         
         <div className="stat-card">
-          <h3>Minimum Roll</h3>
+          <h3>Minimum roll</h3>
           <div className="stat-value">{min}</div>
         </div>
         
         <div className="stat-card">
-          <h3>Maximum Roll</h3>
+          <h3>Maximum roll</h3>
           <div className="stat-value">{max}</div>
         </div>
       </div>
       
       <div className="chart-section">
-        <h3>Roll Total Distribution</h3>
+        <h3>Roll total distribution</h3>
         <div className="histogram">
           {sortedTotals.map(({ total, count }) => (
             <div key={total} className="histogram-bar">

@@ -24,6 +24,9 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
   const [customDieIndex, setCustomDieIndex] = useState<number | null>(null);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const [modifierInputs, setModifierInputs] = useState<{ [key: number]: string }>({});
+  const [showModifierModal, setShowModifierModal] = useState(false);
+  const [modifierDieIndex, setModifierDieIndex] = useState<number | null>(null);
+  const [modifierValue, setModifierValue] = useState('');
 
   const addDie = () => {
     onDiceChange([...currentDice, { sides: 6, quantity: 1, modifier: 0 }]);
@@ -104,6 +107,22 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
     }
   };
 
+  const openModifierModal = (index: number) => {
+    setModifierDieIndex(index);
+    setModifierValue((currentDice[index].modifier || 0).toString());
+    setShowModifierModal(true);
+  };
+
+  const handleModifierSubmit = () => {
+    if (modifierDieIndex !== null) {
+      const num = parseInt(modifierValue) || 0;
+      updateDie(modifierDieIndex, { modifier: Math.max(-99, Math.min(99, num)) });
+      setShowModifierModal(false);
+      setModifierValue('');
+      setModifierDieIndex(null);
+    }
+  };
+
   const isValid = validateDiceConfiguration(currentDice);
 
   return (
@@ -126,17 +145,14 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
           disabled={!isValid || isRolling}
         >
           <Text style={styles.buttonText}>
-            {isRolling ? '🎲 Rolling...' : isValid ? '🎲 Roll Dice' : 'Add dice below to roll'}
+            {isRolling ? 'Rolling...' : isValid ? 'Roll' : 'Add dice below to roll'}
           </Text>
         </Pressable>
 
         {lastRoll && (
           <View style={[styles.preview, { marginBottom: 0 }]}>
-            <View style={[styles.row, { marginBottom: 8, alignItems: 'center' }]}>
-              <Text style={[styles.previewText, { fontWeight: '600', color: colors.textSecondary }]}>
-                TOTAL
-              </Text>
-              <Text style={[styles.totalValue, { fontSize: 32, marginLeft: 16, fontWeight: 'bold' }]}>
+            <View style={[styles.row, { marginBottom: 8, alignItems: 'center', justifyContent: 'center' }]}>
+              <Text style={[styles.totalValue, { fontSize: 64, fontWeight: 'bold', color: colors.primary }]}>
                 {lastRoll.total}
               </Text>
             </View>
@@ -186,7 +202,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
 
       {/* Bottom Section - Dice Configuration */}
       <View style={[styles.card, { margin: 16, marginTop: 8 }]}>
-        <Text style={[styles.sectionTitle, { marginBottom: 12 }]}>Dice Configuration</Text>
+        <Text style={[styles.sectionTitle, { marginBottom: 12 }]}>Dice configuration</Text>
         
         <View style={[styles.row, { gap: 8, marginBottom: 16 }]}>
           <Pressable
@@ -245,7 +261,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
             {/* Table Header */}
             <View style={[styles.row, { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.border }]}>
               <Text style={[styles.inputLabel, { flex: 1, textAlign: 'center' }]}>Qty</Text>
-              <Text style={[styles.inputLabel, { flex: 1, textAlign: 'center' }]}>Die Type</Text>
+              <Text style={[styles.inputLabel, { flex: 1, textAlign: 'center' }]}>Die type</Text>
               {settings.modifiersEnabled && (
                 <Text style={[styles.inputLabel, { flex: 1, textAlign: 'center' }]}>Modifier</Text>
               )}
@@ -331,62 +347,32 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
                     </View>
                   </View>
 
-                  {/* Modifier Input */}
+                  {/* Modifier Button */}
                   {settings.modifiersEnabled && (
                     <View style={{ flex: 1, alignItems: 'center' }}>
-                      <TextInput
-                        style={[
+                      <Pressable
+                        style={({ pressed }) => [
                           styles.numberInput,
-                          focusedInput === `modifier-${index}` && styles.numberInputFocused,
                           { 
                             width: '80%', 
                             height: 48, 
-                            textAlign: 'center',
-                            fontSize: 18,
-                            fontWeight: '600',
-                            color: colors.text,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            backgroundColor: pressed ? colors.borderLight : colors.surface,
                             paddingVertical: 8,
-                            paddingHorizontal: 4
+                            paddingHorizontal: 4,
                           }
                         ]}
-                        value={modifierInputs[index] !== undefined ? modifierInputs[index] : (die.modifier || 0).toString()}
-                        onChangeText={(text) => {
-                          setModifierInputs({ ...modifierInputs, [index]: text });
-                          
-                          // Update the die if it's a valid number or empty
-                          if (text === '' || text === '-') {
-                            updateDie(index, { modifier: 0 });
-                          } else {
-                            const num = parseInt(text);
-                            if (!isNaN(num) && num >= -99 && num <= 99) {
-                              updateDie(index, { modifier: num });
-                            }
-                          }
-                        }}
-                        onFocus={() => {
-                          setFocusedInput(`modifier-${index}`);
-                          // Clear the input if it shows 0
-                          if (die.modifier === 0) {
-                            setModifierInputs({ ...modifierInputs, [index]: '' });
-                          }
-                        }}
-                        onBlur={() => {
-                          setFocusedInput(null);
-                          // Clean up the input state and ensure we have a valid number
-                          const currentInput = modifierInputs[index];
-                          if (currentInput === '' || currentInput === undefined) {
-                            updateDie(index, { modifier: 0 });
-                          }
-                          const newInputs = { ...modifierInputs };
-                          delete newInputs[index];
-                          setModifierInputs(newInputs);
-                        }}
-                        keyboardType="numbers-and-punctuation"
-                        maxLength={3}
-                        selectTextOnFocus
-                        placeholder="0"
-                        placeholderTextColor={colors.textLight}
-                      />
+                        onPress={() => openModifierModal(index)}
+                      >
+                        <Text style={{ 
+                          fontSize: 18, 
+                          fontWeight: '600', 
+                          color: (die.modifier || 0) === 0 ? colors.textLight : colors.text 
+                        }}>
+                          {(die.modifier || 0) === 0 ? '0' : ((die.modifier || 0) > 0 ? `+${die.modifier}` : (die.modifier || 0).toString())}
+                        </Text>
+                      </Pressable>
                     </View>
                   )}
 
@@ -421,7 +407,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
       >
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
           <View style={[styles.card, { width: '100%', maxWidth: 400 }]}>
-            <Text style={[styles.sectionTitle, { marginBottom: 16, textAlign: 'center' }]}>Save Configuration</Text>
+            <Text style={[styles.sectionTitle, { marginBottom: 16, textAlign: 'center' }]}>Save configuration</Text>
             
             <TextInput
               style={[
@@ -488,7 +474,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
         >
           <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
             <View style={[styles.card, { width: '100%', maxWidth: 400 }]}>
-            <Text style={[styles.sectionTitle, { marginBottom: 16, textAlign: 'center' }]}>Custom Die</Text>
+            <Text style={[styles.sectionTitle, { marginBottom: 16, textAlign: 'center' }]}>Custom die</Text>
             
             <Text style={[styles.inputLabel, { marginBottom: 8, textAlign: 'center' }]}>
               How many faces does this die have?
@@ -544,6 +530,81 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
               >
                 <Text style={styles.smallButtonText}>
                   Create D{customDieSides || '?'}
+                </Text>
+              </Pressable>
+            </View>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+      
+      {/* Modifier Modal */}
+      <Modal
+        visible={showModifierModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowModifierModal(false)}
+      >
+        <KeyboardAvoidingView 
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+            <View style={[styles.card, { width: '100%', maxWidth: 400 }]}>
+            <Text style={[styles.sectionTitle, { marginBottom: 16, textAlign: 'center' }]}>Set modifier</Text>
+            
+            <Text style={[styles.inputLabel, { marginBottom: 8, textAlign: 'center' }]}>
+              Enter modifier value (positive or negative)
+            </Text>
+            
+            <TextInput
+              style={[
+                styles.textInput,
+                focusedInput === 'modifier' && styles.textInputFocused,
+                { marginBottom: 20 }
+              ]}
+              placeholder="Enter modifier (e.g., +2, -1, 0)"
+              placeholderTextColor={colors.textLight}
+              value={modifierValue}
+              onChangeText={setModifierValue}
+              onFocus={() => setFocusedInput('modifier')}
+              onBlur={() => setFocusedInput(null)}
+              keyboardType="numbers-and-punctuation"
+              returnKeyType="done"
+              onSubmitEditing={handleModifierSubmit}
+              autoFocus={true}
+              selectTextOnFocus
+            />
+            
+            <View style={[styles.row, { gap: 12 }]}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.button,
+                  styles.smallButton,
+                  { flex: 1, backgroundColor: colors.textLight },
+                  pressed && { backgroundColor: colors.border }
+                ]}
+                onPress={() => {
+                  setShowModifierModal(false);
+                  setModifierValue('');
+                  setModifierDieIndex(null);
+                }}
+              >
+                <Text style={[styles.smallButtonText, { color: 'white' }]}>Cancel</Text>
+              </Pressable>
+              
+              <Pressable
+                style={({ pressed }) => [
+                  styles.button,
+                  styles.smallButton,
+                  styles.successButton,
+                  pressed && styles.successButtonPressed,
+                  { flex: 1 }
+                ]}
+                onPress={handleModifierSubmit}
+              >
+                <Text style={styles.smallButtonText}>
+                  Set Modifier
                 </Text>
               </Pressable>
             </View>

@@ -15,11 +15,11 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
   
   const handleClear = () => {
     Alert.alert(
-      'Clear History',
+      'Clear history',
       'Are you sure you want to clear all roll history? This action cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Clear All', style: 'destructive', onPress: onClear },
+        { text: 'Clear all', style: 'destructive', onPress: onClear },
       ]
     );
   };
@@ -38,7 +38,7 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
       <View style={styles.container}>
         <View style={[styles.emptyState, { marginHorizontal: 0 }]}>
           <Text style={styles.emptyStateIcon}>📜</Text>
-          <Text style={styles.emptyStateTitle}>No Roll History</Text>
+          <Text style={styles.emptyStateTitle}>No roll history</Text>
           <Text style={styles.emptyStateText}>
             Start rolling dice to see your roll history here. All rolls are automatically saved.
           </Text>
@@ -52,7 +52,7 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
       <View style={styles.content}>
         <View style={[styles.row, styles.spaceBetween, { marginBottom: 16 }]}>
           <Text style={styles.sectionTitle}>
-            Roll History ({history.length})
+            Roll history ({history.length})
           </Text>
           
           <Pressable
@@ -64,7 +64,7 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
             ]}
             onPress={handleClear}
           >
-            <Text style={styles.smallButtonText}>Clear All</Text>
+            <Text style={styles.smallButtonText}>Clear all</Text>
           </Pressable>
         </View>
         
