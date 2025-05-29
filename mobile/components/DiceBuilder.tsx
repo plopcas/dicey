@@ -16,10 +16,13 @@ interface DiceBuilderProps {
 export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRoll, currentDice, onDiceChange }) => {
   const [configName, setConfigName] = useState('');
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showCustomDieModal, setShowCustomDieModal] = useState(false);
+  const [customDieSides, setCustomDieSides] = useState('');
+  const [customDieIndex, setCustomDieIndex] = useState<number | null>(null);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
   const addDie = () => {
-    onDiceChange([...currentDice, { sides: 6, quantity: 1 }]);
+    onDiceChange([...currentDice, { sides: 6, quantity: 1, modifier: 0 }]);
   };
 
   const updateDie = (index: number, updates: Partial<Die>) => {
@@ -69,6 +72,27 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
       return;
     }
     onRoll(currentDice);
+  };
+
+  const handleDieTypeChange = (index: number, newSides: number) => {
+    if (newSides === -1) {
+      // Custom die selected
+      setCustomDieIndex(index);
+      setCustomDieSides('');
+      setShowCustomDieModal(true);
+    } else {
+      updateDie(index, { sides: newSides });
+    }
+  };
+
+  const handleCustomDieSubmit = () => {
+    const sides = parseInt(customDieSides);
+    if (sides > 0 && customDieIndex !== null) {
+      updateDie(customDieIndex, { sides });
+      setShowCustomDieModal(false);
+      setCustomDieSides('');
+      setCustomDieIndex(null);
+    }
   };
 
   const isValid = validateDiceConfiguration(currentDice);
@@ -246,7 +270,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
                       </Text>
                       <Picker
                         selectedValue={die.sides}
-                        onValueChange={(value) => updateDie(index, { sides: value })}
+                        onValueChange={(value) => handleDieTypeChange(index, value)}
                         style={{ 
                           position: 'absolute',
                           width: '100%',
@@ -257,10 +281,16 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
                         {DICE_TYPES.map(sides => (
                           <Picker.Item 
                             key={sides} 
-                            label={`D${sides}`} 
+                            label={sides === -1 ? 'Custom...' : `D${sides}`} 
                             value={sides}
                           />
                         ))}
+                        {!DICE_TYPES.includes(die.sides as any) && (
+                          <Picker.Item 
+                            label={`D${die.sides}`} 
+                            value={die.sides}
+                          />
+                        )}
                       </Picker>
                     </View>
                   </View>
@@ -344,6 +374,77 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
                 disabled={!configName.trim()}
               >
                 <Text style={styles.smallButtonText}>Save</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      
+      {/* Custom Die Modal */}
+      <Modal
+        visible={showCustomDieModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowCustomDieModal(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={[styles.card, { width: '100%', maxWidth: 400 }]}>
+            <Text style={[styles.sectionTitle, { marginBottom: 16, textAlign: 'center' }]}>Custom Die</Text>
+            
+            <Text style={[styles.inputLabel, { marginBottom: 8, textAlign: 'center' }]}>
+              How many faces does this die have?
+            </Text>
+            
+            <TextInput
+              style={[
+                styles.textInput,
+                focusedInput === 'customDie' && styles.textInputFocused,
+                { marginBottom: 20 }
+              ]}
+              placeholder="Enter number of faces (e.g., 3, 7, 13...)"
+              placeholderTextColor={colors.textLight}
+              value={customDieSides}
+              onChangeText={setCustomDieSides}
+              onFocus={() => setFocusedInput('customDie')}
+              onBlur={() => setFocusedInput(null)}
+              keyboardType="numeric"
+              returnKeyType="done"
+              onSubmitEditing={handleCustomDieSubmit}
+              autoFocus={true}
+            />
+            
+            <View style={[styles.row, { gap: 12 }]}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.button,
+                  styles.smallButton,
+                  { flex: 1, backgroundColor: colors.textLight },
+                  pressed && { backgroundColor: colors.border }
+                ]}
+                onPress={() => {
+                  setShowCustomDieModal(false);
+                  setCustomDieSides('');
+                  setCustomDieIndex(null);
+                }}
+              >
+                <Text style={[styles.smallButtonText, { color: 'white' }]}>Cancel</Text>
+              </Pressable>
+              
+              <Pressable
+                style={({ pressed }) => [
+                  styles.button,
+                  styles.smallButton,
+                  styles.successButton,
+                  (!customDieSides.trim() || parseInt(customDieSides) < 2) && styles.disabledButton,
+                  pressed && customDieSides.trim() && parseInt(customDieSides) >= 2 && styles.successButtonPressed,
+                  { flex: 1 }
+                ]}
+                onPress={handleCustomDieSubmit}
+                disabled={!customDieSides.trim() || parseInt(customDieSides) < 2}
+              >
+                <Text style={styles.smallButtonText}>
+                  Create D{customDieSides || '?'}
+                </Text>
               </Pressable>
             </View>
           </View>

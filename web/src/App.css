@@ -113,6 +113,29 @@ body {
   color: #333;
 }
 
+.presets-section {
+  margin-bottom: 1.5rem;
+}
+
+.presets-section h3 {
+  margin-bottom: 0.75rem;
+  color: #555;
+  font-size: 1rem;
+}
+
+.presets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.preset-btn {
+  font-size: 0.8rem;
+  padding: 0.5rem;
+  min-width: 60px;
+}
+
 .dice-list {
   margin-bottom: 1.5rem;
 }
@@ -276,6 +299,16 @@ body {
   transform: none;
 }
 
+.roll-btn.rolling {
+  animation: shake 0.6s ease-in-out infinite;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
 .save-btn {
   background: #28a745;
   color: white;
@@ -400,48 +433,22 @@ body {
 }
 
 .dice-results {
-  background: #f8f9fa;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-}
-
-.die-result {
-  margin-bottom: 1rem;
-}
-
-.die-result:last-child {
-  margin-bottom: 0;
-}
-
-.die-result h4 {
-  margin-bottom: 0.75rem;
-  color: #333;
-  font-size: 1rem;
-}
-
-.individual-rolls {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .roll-value {
   background: #667eea;
   color: white;
-  padding: 0.5rem;
-  border-radius: 6px;
+  padding: 0.75rem;
+  border-radius: 8px;
   font-weight: 600;
-  min-width: 36px;
+  min-width: 44px;
   text-align: center;
-  font-size: 1rem;
-}
-
-.die-total {
-  font-weight: 600;
-  color: #666;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .roll-timestamp {
@@ -580,7 +587,7 @@ body {
 /* Dice table */
 .dice-table-header {
   display: grid;
-  grid-template-columns: 1fr 1fr 80px;
+  grid-template-columns: 1fr 1fr 1fr 80px;
   gap: 1rem;
   padding: 0.75rem;
   background: #f8f9fa;
@@ -592,7 +599,7 @@ body {
 
 .die-config {
   display: grid;
-  grid-template-columns: 1fr 1fr 80px;
+  grid-template-columns: 1fr 1fr 1fr 80px;
   gap: 1rem;
   padding: 1rem;
   background: #f8f9fa;
@@ -608,6 +615,15 @@ body {
   border-radius: 4px;
   font-size: 1rem;
   text-align: center;
+}
+
+.die-config select {
+  padding-right: 2rem;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8"><path fill="%23666" d="M6 8L0 2h12z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 12px;
+  appearance: none;
 }
 
 /* Modal */
@@ -666,6 +682,123 @@ body {
 
 .cancel-btn:hover {
   background: #5a6268;
+}
+
+/* Statistics */
+.statistics h2 {
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  border-left: 4px solid #667eea;
+}
+
+.stat-card h3 {
+  margin-bottom: 0.5rem;
+  color: #666;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.chart-section {
+  margin-bottom: 2rem;
+}
+
+.chart-section h3 {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.histogram {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  min-height: 250px;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.histogram-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 40px;
+}
+
+.bar {
+  background: linear-gradient(to top, #667eea, #764ba2);
+  border-radius: 4px 4px 0 0;
+  width: 30px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 4px;
+  transition: all 0.3s ease;
+}
+
+.bar:hover {
+  background: linear-gradient(to top, #5a6fd8, #6a4194);
+}
+
+.bar-count {
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.bar-label {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.recent-rolls h3 {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.trend-line {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 120px;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.trend-point {
+  background: #667eea;
+  width: 8px;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.3s ease;
+}
+
+.trend-point:hover {
+  background: #5a6fd8;
+  width: 12px;
 }
 
 /* Loading */

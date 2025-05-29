@@ -6,9 +6,10 @@ interface RollResultProps {
   result: RollResultType | null;
   onRoll: (dice: Die[]) => void;
   currentDice: Die[];
+  isRolling: boolean;
 }
 
-export const RollResult: React.FC<RollResultProps> = ({ result, onRoll, currentDice }) => {
+export const RollResult: React.FC<RollResultProps> = ({ result, onRoll, currentDice, isRolling }) => {
   const isValid = validateDiceConfiguration(currentDice);
 
   const handleRoll = () => {
@@ -21,10 +22,10 @@ export const RollResult: React.FC<RollResultProps> = ({ result, onRoll, currentD
     <div className="roll-result">
       <button
         onClick={handleRoll}
-        disabled={!isValid}
-        className="roll-btn primary"
+        disabled={!isValid || isRolling}
+        className={`roll-btn primary ${isRolling ? 'rolling' : ''}`}
       >
-        {isValid ? '🎲 Roll Dice' : 'Add dice to roll'}
+        {isRolling ? '🎲 Rolling...' : isValid ? '🎲 Roll Dice' : 'Add dice to roll'}
       </button>
 
       {result && (
@@ -34,20 +35,10 @@ export const RollResult: React.FC<RollResultProps> = ({ result, onRoll, currentD
           </div>
 
           <div className="dice-results">
-            {result.dice.map((die, dieIndex) => (
-              <div key={dieIndex} className="die-result">
-                <h4>{die.quantity}D{die.sides}</h4>
-                <div className="individual-rolls">
-                  {result.results[dieIndex].map((roll, rollIndex) => (
-                    <span key={rollIndex} className="roll-value">
-                      {roll}
-                    </span>
-                  ))}
-                </div>
-                <div className="die-total">
-                  Sum: {result.results[dieIndex].reduce((sum, roll) => sum + roll, 0)}
-                </div>
-              </div>
+            {result.results.flat().map((roll, index) => (
+              <span key={index} className="roll-value">
+                {roll}
+              </span>
             ))}
           </div>
 

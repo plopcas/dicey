@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { DiceConfiguration, RollResult, Die } from './shared/types';
 import { diceService } from './services/diceService';
 import { DiceBuilder } from './components/DiceBuilder';
 import { SavedConfigurations } from './components/SavedConfigurations';
 import { RollResult as RollResultComponent } from './components/RollResult';
 import { RollHistory } from './components/RollHistory';
+import { Statistics } from './components/Statistics';
+import { validateDiceConfiguration } from './shared/utils';
 import './App.css';
 
-type Tab = 'builder' | 'saved' | 'history';
+type Tab = 'builder' | 'saved' | 'history' | 'statistics';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('builder');
@@ -16,10 +18,26 @@ const App: React.FC = () => {
   const [lastRoll, setLastRoll] = useState<RollResult | null>(null);
   const [currentDice, setCurrentDice] = useState<Die[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRolling, setIsRolling] = useState(false);
 
   useEffect(() => {
     loadData();
   }, []);
+
+  // Keyboard shortcut for rolling dice
+  const handleKeyPress = useCallback((event: KeyboardEvent) => {
+    if (event.code === 'Space' && activeTab === 'builder' && validateDiceConfiguration(currentDice)) {
+      event.preventDefault();
+      handleRoll(currentDice);
+    }
+  }, [activeTab, currentDice]);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyPress);
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [handleKeyPress]);
 
   const loadData = async () => {
     try {
@@ -34,6 +52,30 @@ const App: React.FC = () => {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Create dice roll sound effect
+  const playDiceSound = () => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+      oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.3);
+      
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+    } catch (error) {
+      console.log('Audio not supported');
     }
   };
 
@@ -59,6 +101,12 @@ const App: React.FC = () => {
 
   const handleRoll = async (dice: Die[] | DiceConfiguration) => {
     try {
+      setIsRolling(true);
+      playDiceSound();
+      
+      // Add a delay for animation effect
+      await new Promise(resolve => setTimeout(resolve, 600));
+      
       let result: RollResult;
       
       if ('id' in dice) {
@@ -84,6 +132,8 @@ const App: React.FC = () => {
       setRollHistory(prev => [result, ...prev]);
     } catch (error) {
       console.error('Error rolling dice:', error);
+    } finally {
+      setIsRolling(false);
     }
   };
 
@@ -122,6 +172,12 @@ const App: React.FC = () => {
         >
           History ({rollHistory.length})
         </button>
+        <button
+          className={`nav-btn ${activeTab === 'statistics' ? 'active' : ''}`}
+          onClick={() => setActiveTab('statistics')}
+        >
+          Statistics
+        </button>
       </nav>
 
       <main className="app-main">
@@ -134,7 +190,7 @@ const App: React.FC = () => {
             {activeTab === 'builder' ? (
               <>
                 <div className="primary-content">
-                  <RollResultComponent result={lastRoll} onRoll={handleRoll} currentDice={currentDice} />
+                  <RollResultComponent result={lastRoll} onRoll={handleRoll} currentDice={currentDice} isRolling={isRolling} />
                 </div>
                 <div className="sidebar">
                   <DiceBuilder 
@@ -156,6 +212,9 @@ const App: React.FC = () => {
                 )}
                 {activeTab === 'history' && (
                   <RollHistory history={rollHistory} onClear={handleClearHistory} />
+                )}
+                {activeTab === 'statistics' && (
+                  <Statistics history={rollHistory} />
                 )}
               </div>
             )}

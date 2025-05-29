@@ -12,9 +12,12 @@ interface DiceBuilderProps {
 export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, currentDice, onDiceChange }) => {
   const [configName, setConfigName] = useState('');
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showCustomDieModal, setShowCustomDieModal] = useState(false);
+  const [customDieSides, setCustomDieSides] = useState('');
+  const [customDieIndex, setCustomDieIndex] = useState<number | null>(null);
 
   const addDie = () => {
-    onDiceChange([...currentDice, { sides: 6, quantity: 1 }]);
+    onDiceChange([...currentDice, { sides: 6, quantity: 1, modifier: 0 }]);
   };
 
   const updateDie = (index: number, updates: Partial<Die>) => {
@@ -47,6 +50,27 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, curren
       setConfigName('');
       setShowSaveModal(false);
       alert('Configuration saved!');
+    }
+  };
+
+  const handleDieTypeChange = (index: number, newSides: number) => {
+    if (newSides === -1) {
+      // Custom die selected
+      setCustomDieIndex(index);
+      setCustomDieSides('');
+      setShowCustomDieModal(true);
+    } else {
+      updateDie(index, { sides: newSides });
+    }
+  };
+
+  const handleCustomDieSubmit = () => {
+    const sides = parseInt(customDieSides);
+    if (sides > 0 && customDieIndex !== null) {
+      updateDie(customDieIndex, { sides });
+      setShowCustomDieModal(false);
+      setCustomDieSides('');
+      setCustomDieIndex(null);
     }
   };
 
@@ -98,6 +122,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, curren
             <div className="dice-table-header">
               <span>Qty</span>
               <span>Die Type</span>
+              <span>Modifier</span>
               <span>Action</span>
             </div>
             {currentDice.map((die, index) => (
@@ -112,12 +137,26 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, curren
                 
                 <select
                   value={die.sides}
-                  onChange={(e) => updateDie(index, { sides: parseInt(e.target.value) })}
+                  onChange={(e) => handleDieTypeChange(index, parseInt(e.target.value))}
                 >
                   {DICE_TYPES.map(sides => (
-                    <option key={sides} value={sides}>D{sides}</option>
+                    <option key={sides} value={sides}>
+                      {sides === -1 ? 'Custom...' : `D${sides}`}
+                    </option>
                   ))}
+                  {!DICE_TYPES.includes(die.sides as any) && (
+                    <option value={die.sides}>D{die.sides}</option>
+                  )}
                 </select>
+                
+                <input
+                  type="number"
+                  min="-99"
+                  max="99"
+                  value={die.modifier || 0}
+                  onChange={(e) => updateDie(index, { modifier: parseInt(e.target.value) || 0 })}
+                  placeholder="±0"
+                />
                 
                 <button onClick={() => removeDie(index)} className="remove-btn">
                   ×
@@ -156,6 +195,44 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, curren
                 className="save-btn primary"
               >
                 Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Die Modal */}
+      {showCustomDieModal && (
+        <div className="modal-overlay" onClick={() => setShowCustomDieModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Custom Die</h3>
+            <p>How many faces does this die have?</p>
+            <input
+              type="number"
+              placeholder="Enter number of faces (e.g., 3, 7, 13...)"
+              value={customDieSides}
+              onChange={(e) => setCustomDieSides(e.target.value)}
+              min="2"
+              max="1000"
+              autoFocus
+            />
+            <div className="modal-actions">
+              <button
+                onClick={() => {
+                  setShowCustomDieModal(false);
+                  setCustomDieSides('');
+                  setCustomDieIndex(null);
+                }}
+                className="cancel-btn"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCustomDieSubmit}
+                disabled={!customDieSides.trim() || parseInt(customDieSides) < 2}
+                className="save-btn primary"
+              >
+                Create D{customDieSides || '?'}
               </button>
             </div>
           </div>

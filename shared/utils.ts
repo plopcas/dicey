@@ -40,6 +40,10 @@ export const rollDice = (configuration: DiceConfiguration): RollResult => {
       dieResults.push(roll);
       total += roll;
     }
+    // Add modifier to total (not to individual rolls)
+    if (die.modifier) {
+      total += die.modifier;
+    }
     results.push(dieResults);
   });
 
@@ -56,7 +60,13 @@ export const rollDice = (configuration: DiceConfiguration): RollResult => {
 
 export const formatDiceConfiguration = (dice: Die[]): string => {
   return dice
-    .map((die) => `${die.quantity}D${die.sides}`)
+    .map((die) => {
+      let str = `${die.quantity}D${die.sides}`;
+      if (die.modifier) {
+        str += die.modifier > 0 ? `+${die.modifier}` : `${die.modifier}`;
+      }
+      return str;
+    })
     .join(' + ');
 };
 
