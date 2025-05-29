@@ -76,7 +76,7 @@ body {
 
 .content-container {
   display: grid;
-  grid-template-columns: 1fr 300px;
+  grid-template-columns: 1fr 1fr;
   gap: 2rem;
   max-width: 1200px;
   margin: 0 auto;
@@ -97,6 +97,14 @@ body {
   height: fit-content;
   position: sticky;
   top: 2rem;
+}
+
+.full-width-content {
+  grid-column: 1 / -1;
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 /* Dice Builder */
@@ -190,6 +198,58 @@ body {
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 1rem;
+}
+
+/* Button group */
+.button-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Base button styles */
+.btn {
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  min-width: 80px;
+  text-align: center;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #5a6268;
+}
+
+.btn-success {
+  background: #28a745;
+  color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #218838;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #c82333;
 }
 
 /* Buttons */
@@ -306,46 +366,58 @@ body {
 }
 
 /* Roll Result */
-.roll-result h2 {
-  margin-bottom: 1.5rem;
-  color: #333;
+.roll-result {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.roll-result .roll-btn.primary {
+  margin-bottom: 1rem;
 }
 
 .result-header {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
-.result-header h3 {
-  margin-bottom: 0.5rem;
-  color: #333;
-}
-
-.total {
-  font-size: 1.2rem;
+.result-header .total {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .total-value {
   color: #667eea;
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 700;
 }
 
 .dice-results {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
   margin-bottom: 1rem;
 }
 
 .die-result {
-  background: #f8f9fa;
-  padding: 1rem;
-  border-radius: 6px;
   margin-bottom: 1rem;
 }
 
+.die-result:last-child {
+  margin-bottom: 0;
+}
+
 .die-result h4 {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   color: #333;
+  font-size: 1rem;
 }
 
 .individual-rolls {
@@ -358,16 +430,18 @@ body {
 .roll-value {
   background: #667eea;
   color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  padding: 0.5rem;
+  border-radius: 6px;
   font-weight: 600;
-  min-width: 30px;
+  min-width: 36px;
   text-align: center;
+  font-size: 1rem;
 }
 
 .die-total {
   font-weight: 600;
   color: #666;
+  font-size: 0.9rem;
 }
 
 .roll-timestamp {
@@ -398,45 +472,87 @@ body {
 }
 
 .history-item {
-  padding: 1rem;
+  padding: 1.5rem;
   background: #f8f9fa;
-  border-radius: 6px;
-  border-left: 3px solid #667eea;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
 }
 
 .roll-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
 }
 
-.roll-total {
-  color: #667eea;
+.roll-title {
+  font-size: 1.1rem;
   font-weight: 600;
+  color: #333;
 }
 
-.roll-formula {
-  font-family: 'Courier New', monospace;
-  color: #666;
-  margin-bottom: 0.5rem;
+.roll-total-badge {
+  background: #667eea;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 1.1rem;
 }
 
-.roll-details {
+.roll-dice-results {
+  margin-bottom: 1rem;
+}
+
+.die-group {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 6px;
+}
+
+.die-group:last-child {
+  margin-bottom: 0;
+}
+
+.die-group-header {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 0.5rem;
 }
 
-.die-detail {
-  font-size: 0.9rem;
-  color: #555;
+.die-type {
+  font-weight: 600;
+  color: #333;
 }
 
-.roll-time {
-  color: #999;
-  font-size: 0.8rem;
+.die-sum {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.individual-rolls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.roll-value {
+  background: #667eea;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  min-width: 30px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.roll-meta {
+  color: #666;
+  font-size: 0.9rem;
+  font-style: italic;
 }
 
 /* Empty states */
@@ -448,6 +564,118 @@ body {
 
 .empty h2 {
   margin-bottom: 1rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.empty-state p:first-child {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* Dice table */
+.dice-table-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 80px;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.die-config {
+  display: grid;
+  grid-template-columns: 1fr 1fr 80px;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.die-config input,
+.die-config select {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  text-align: center;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 400px;
+}
+
+.modal h3 {
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #333;
+}
+
+.modal input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.cancel-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.cancel-btn:hover {
+  background: #5a6268;
+}
+
+/* Loading */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  font-size: 1.1rem;
+  color: #666;
 }
 
 /* Responsive design */

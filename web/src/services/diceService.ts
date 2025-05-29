@@ -3,37 +3,38 @@ import { rollDice, generateId } from '../shared/utils';
 import { WebStorageService } from './storage';
 
 export class DiceService implements DiceRollService {
-  rollDice(configuration: DiceConfiguration): RollResult {
+  async rollDice(configuration: DiceConfiguration): Promise<RollResult> {
     const result = rollDice(configuration);
-    this.saveRoll(result);
+    // Save roll and wait for it to complete
+    await this.saveRoll(result);
     return result;
   }
 
-  saveConfiguration(configData: Omit<DiceConfiguration, 'id' | 'createdAt'>): DiceConfiguration {
+  async saveConfiguration(configData: Omit<DiceConfiguration, 'id' | 'createdAt'>): Promise<DiceConfiguration> {
     const configuration: DiceConfiguration = {
       ...configData,
       id: generateId(),
       createdAt: new Date(),
     };
 
-    const configurations = this.getConfigurations();
+    const configurations = await this.getConfigurations();
     configurations.push(configuration);
     WebStorageService.saveConfigurations(configurations);
     
     return configuration;
   }
 
-  getConfigurations(): DiceConfiguration[] {
+  async getConfigurations(): Promise<DiceConfiguration[]> {
     return WebStorageService.getConfigurations();
   }
 
-  deleteConfiguration(id: string): void {
-    const configurations = this.getConfigurations().filter(config => config.id !== id);
+  async deleteConfiguration(id: string): Promise<void> {
+    const configurations = (await this.getConfigurations()).filter(config => config.id !== id);
     WebStorageService.saveConfigurations(configurations);
   }
 
-  saveRoll(roll: RollResult): void {
-    const history = this.getRollHistory();
+  async saveRoll(roll: RollResult): Promise<void> {
+    const history = await this.getRollHistory();
     history.unshift(roll); // Add to beginning for most recent first
     
     // Keep only last 1000 rolls to prevent storage bloat
@@ -44,11 +45,11 @@ export class DiceService implements DiceRollService {
     WebStorageService.saveRollHistory(history);
   }
 
-  getRollHistory(): RollResult[] {
+  async getRollHistory(): Promise<RollResult[]> {
     return WebStorageService.getRollHistory();
   }
 
-  clearHistory(): void {
+  async clearHistory(): Promise<void> {
     WebStorageService.clearRollHistory();
   }
 }

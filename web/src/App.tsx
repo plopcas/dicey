@@ -14,44 +14,86 @@ const App: React.FC = () => {
   const [configurations, setConfigurations] = useState<DiceConfiguration[]>([]);
   const [rollHistory, setRollHistory] = useState<RollResult[]>([]);
   const [lastRoll, setLastRoll] = useState<RollResult | null>(null);
+  const [currentDice, setCurrentDice] = useState<Die[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setConfigurations(diceService.getConfigurations());
-    setRollHistory(diceService.getRollHistory());
+    loadData();
   }, []);
 
-  const handleSaveConfiguration = (name: string, dice: Die[]) => {
-    diceService.saveConfiguration({ name, dice });
-    setConfigurations(diceService.getConfigurations());
-  };
-
-  const handleDeleteConfiguration = (id: string) => {
-    diceService.deleteConfiguration(id);
-    setConfigurations(diceService.getConfigurations());
-  };
-
-  const handleRoll = (dice: Die[] | DiceConfiguration) => {
-    let result: RollResult;
-    
-    if ('id' in dice) {
-      result = diceService.rollDice(dice);
-    } else {
-      const tempConfig: DiceConfiguration = {
-        id: 'temp',
-        name: 'Quick Roll',
-        dice,
-        createdAt: new Date(),
-      };
-      result = diceService.rollDice(tempConfig);
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [configs, history] = await Promise.all([
+        diceService.getConfigurations(),
+        diceService.getRollHistory()
+      ]);
+      setConfigurations(configs);
+      setRollHistory(history);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
     }
-    
-    setLastRoll(result);
-    setRollHistory(diceService.getRollHistory());
   };
 
-  const handleClearHistory = () => {
-    diceService.clearHistory();
-    setRollHistory([]);
+  const handleSaveConfiguration = async (name: string, dice: Die[]) => {
+    try {
+      await diceService.saveConfiguration({ name, dice });
+      const newConfigs = await diceService.getConfigurations();
+      setConfigurations(newConfigs);
+    } catch (error) {
+      console.error('Error saving configuration:', error);
+    }
+  };
+
+  const handleDeleteConfiguration = async (id: string) => {
+    try {
+      await diceService.deleteConfiguration(id);
+      const newConfigs = await diceService.getConfigurations();
+      setConfigurations(newConfigs);
+    } catch (error) {
+      console.error('Error deleting configuration:', error);
+    }
+  };
+
+  const handleRoll = async (dice: Die[] | DiceConfiguration) => {
+    try {
+      let result: RollResult;
+      
+      if ('id' in dice) {
+        // Rolling a saved configuration - switch to builder tab to show result
+        result = await diceService.rollDice(dice);
+        setCurrentDice(dice.dice); // Load the dice configuration
+        setActiveTab('builder');
+      } else {
+        // Rolling a temporary configuration
+        const tempConfig: DiceConfiguration = {
+          id: 'temp',
+          name: 'Quick Roll',
+          dice,
+          createdAt: new Date(),
+        };
+        result = await diceService.rollDice(tempConfig);
+        setCurrentDice(dice); // Update current dice state
+      }
+      
+      setLastRoll(result);
+      
+      // Update roll history count immediately
+      setRollHistory(prev => [result, ...prev]);
+    } catch (error) {
+      console.error('Error rolling dice:', error);
+    }
+  };
+
+  const handleClearHistory = async () => {
+    try {
+      await diceService.clearHistory();
+      setRollHistory([]);
+    } catch (error) {
+      console.error('Error clearing history:', error);
+    }
   };
 
   return (
@@ -66,7 +108,7 @@ const App: React.FC = () => {
           className={`nav-btn ${activeTab === 'builder' ? 'active' : ''}`}
           onClick={() => setActiveTab('builder')}
         >
-          Dice Builder
+          Builder
         </button>
         <button
           className={`nav-btn ${activeTab === 'saved' ? 'active' : ''}`}
@@ -83,27 +125,42 @@ const App: React.FC = () => {
       </nav>
 
       <main className="app-main">
-        <div className="content-container">
-          <div className="primary-content">
-            {activeTab === 'builder' && (
-              <DiceBuilder onSave={handleSaveConfiguration} onRoll={handleRoll} />
-            )}
-            {activeTab === 'saved' && (
-              <SavedConfigurations
-                configurations={configurations}
-                onRoll={handleRoll}
-                onDelete={handleDeleteConfiguration}
-              />
-            )}
-            {activeTab === 'history' && (
-              <RollHistory history={rollHistory} onClear={handleClearHistory} />
+        {loading ? (
+          <div className="loading">
+            <p>Loading...</p>
+          </div>
+        ) : (
+          <div className="content-container">
+            {activeTab === 'builder' ? (
+              <>
+                <div className="primary-content">
+                  <RollResultComponent result={lastRoll} onRoll={handleRoll} currentDice={currentDice} />
+                </div>
+                <div className="sidebar">
+                  <DiceBuilder 
+                    onSave={handleSaveConfiguration} 
+                    onRoll={handleRoll}
+                    currentDice={currentDice}
+                    onDiceChange={setCurrentDice}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="full-width-content">
+                {activeTab === 'saved' && (
+                  <SavedConfigurations
+                    configurations={configurations}
+                    onRoll={handleRoll}
+                    onDelete={handleDeleteConfiguration}
+                  />
+                )}
+                {activeTab === 'history' && (
+                  <RollHistory history={rollHistory} onClear={handleClearHistory} />
+                )}
+              </div>
             )}
           </div>
-
-          <div className="sidebar">
-            <RollResultComponent result={lastRoll} />
-          </div>
-        </div>
+        )}
       </main>
     </div>
   );

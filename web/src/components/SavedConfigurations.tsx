@@ -43,10 +43,14 @@ export const SavedConfigurations: React.FC<SavedConfigurationsProps> = ({
                 Roll
               </button>
               <button
-                onClick={() => onDelete(config.id)}
+                onClick={() => {
+                  if (window.confirm(`Are you sure you want to delete "${config.name}"?`)) {
+                    onDelete(config.id);
+                  }
+                }}
                 className="delete-btn danger"
               >
-                Delete
+                ×
               </button>
             </div>
           </div>

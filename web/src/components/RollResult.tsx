@@ -1,50 +1,68 @@
 import React from 'react';
-import { RollResult as RollResultType } from '../shared/types';
+import { RollResult as RollResultType, Die } from '../shared/types';
+import { validateDiceConfiguration } from '../shared/utils';
 
 interface RollResultProps {
   result: RollResultType | null;
+  onRoll: (dice: Die[]) => void;
+  currentDice: Die[];
 }
 
-export const RollResult: React.FC<RollResultProps> = ({ result }) => {
-  if (!result) {
-    return (
-      <div className="roll-result empty">
-        <h2>Roll Result</h2>
-        <p>Configure and roll some dice to see results!</p>
-      </div>
-    );
-  }
+export const RollResult: React.FC<RollResultProps> = ({ result, onRoll, currentDice }) => {
+  const isValid = validateDiceConfiguration(currentDice);
+
+  const handleRoll = () => {
+    if (isValid) {
+      onRoll(currentDice);
+    }
+  };
 
   return (
     <div className="roll-result">
-      <h2>Roll Result</h2>
-      
-      <div className="result-header">
-        <h3>{result.configurationName}</h3>
-        <div className="total">Total: <span className="total-value">{result.total}</span></div>
-      </div>
+      <button
+        onClick={handleRoll}
+        disabled={!isValid}
+        className="roll-btn primary"
+      >
+        {isValid ? '🎲 Roll Dice' : 'Add dice to roll'}
+      </button>
 
-      <div className="dice-results">
-        {result.dice.map((die, dieIndex) => (
-          <div key={dieIndex} className="die-result">
-            <h4>{die.quantity}D{die.sides}</h4>
-            <div className="individual-rolls">
-              {result.results[dieIndex].map((roll, rollIndex) => (
-                <span key={rollIndex} className="roll-value">
-                  {roll}
-                </span>
-              ))}
-            </div>
-            <div className="die-total">
-              Sum: {result.results[dieIndex].reduce((sum, roll) => sum + roll, 0)}
-            </div>
+      {result && (
+        <>
+          <div className="result-header">
+            <div className="total">TOTAL <span className="total-value">{result.total}</span></div>
           </div>
-        ))}
-      </div>
 
-      <div className="roll-timestamp">
-        Rolled at {result.timestamp.toLocaleString()}
-      </div>
+          <div className="dice-results">
+            {result.dice.map((die, dieIndex) => (
+              <div key={dieIndex} className="die-result">
+                <h4>{die.quantity}D{die.sides}</h4>
+                <div className="individual-rolls">
+                  {result.results[dieIndex].map((roll, rollIndex) => (
+                    <span key={rollIndex} className="roll-value">
+                      {roll}
+                    </span>
+                  ))}
+                </div>
+                <div className="die-total">
+                  Sum: {result.results[dieIndex].reduce((sum, roll) => sum + roll, 0)}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="roll-timestamp">
+            {result.timestamp.toLocaleString()}
+          </div>
+        </>
+      )}
+
+      {!result && (
+        <div className="empty-state">
+          <p>🎲</p>
+          <p>Configure and roll some dice to see results!</p>
+        </div>
+      )}
     </div>
   );
 };

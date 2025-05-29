@@ -21,13 +21,13 @@ export interface RollResult {
 }
 
 export interface DiceRollService {
-  rollDice: (configuration: DiceConfiguration) => RollResult;
-  saveConfiguration: (configuration: Omit<DiceConfiguration, 'id' | 'createdAt'>) => DiceConfiguration;
-  getConfigurations: () => DiceConfiguration[];
-  deleteConfiguration: (id: string) => void;
-  saveRoll: (roll: RollResult) => void;
-  getRollHistory: () => RollResult[];
-  clearHistory: () => void;
+  rollDice: (configuration: DiceConfiguration) => Promise<RollResult>;
+  saveConfiguration: (configuration: Omit<DiceConfiguration, 'id' | 'createdAt'>) => Promise<DiceConfiguration>;
+  getConfigurations: () => Promise<DiceConfiguration[]>;
+  deleteConfiguration: (id: string) => Promise<void>;
+  saveRoll: (roll: RollResult) => Promise<void>;
+  getRollHistory: () => Promise<RollResult[]>;
+  clearHistory: () => Promise<void>;
 }
 
 export const DICE_TYPES = [4, 6, 8, 10, 12, 20, 100] as const;
