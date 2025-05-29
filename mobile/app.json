@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "Dicey",
+    "slug": "dicey-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#667eea"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.dicey.mobile"
+    },
+    "android": {
+      "package": "com.dicey.mobile"
+    }
+  }
+}
