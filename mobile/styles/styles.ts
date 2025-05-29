@@ -185,7 +185,6 @@ export const styles = StyleSheet.create({
     color: colors.text,
     fontWeight: '600',
     marginBottom: spacing.xs,
-    textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   numberInput: {

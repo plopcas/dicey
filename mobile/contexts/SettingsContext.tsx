@@ -3,7 +3,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface Settings {
   soundEnabled: boolean;
-  animationEnabled: boolean;
   modifiersEnabled: boolean;
 }
 
@@ -14,7 +13,6 @@ interface SettingsContextType {
 
 const defaultSettings: Settings = {
   soundEnabled: true,
-  animationEnabled: true,
   modifiersEnabled: true,
 };
 

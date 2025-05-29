@@ -445,6 +445,7 @@ body {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .roll-value {
@@ -579,6 +580,46 @@ body {
   color: #666;
   font-size: 0.9rem;
   font-style: italic;
+}
+
+/* Compact history styles */
+.history-item-compact {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+  margin-bottom: 1rem;
+}
+
+.history-date {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.history-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.history-dice {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.history-total {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #667eea;
+  background: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  min-width: 50px;
+  text-align: center;
 }
 
 /* Empty states */

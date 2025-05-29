@@ -52,20 +52,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose }
             />
           </View>
 
-          <View style={styles.settingItem}>
-            <View style={styles.settingInfo}>
-              <Text style={styles.settingTitle}>Animations</Text>
-              <Text style={styles.settingDescription}>
-                Enable rolling animations
-              </Text>
-            </View>
-            <Switch
-              value={settings.animationEnabled}
-              onValueChange={(value) => updateSettings({ animationEnabled: value })}
-              trackColor={{ false: '#767577', true: colors.primary }}
-              thumbColor={settings.animationEnabled ? colors.surface : '#f4f3f4'}
-            />
-          </View>
 
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>

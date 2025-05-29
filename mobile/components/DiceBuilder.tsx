@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, ScrollView, Alert, Pressable, Modal, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { Die, DICE_TYPES, RollResult } from '../shared/types';
@@ -27,6 +27,11 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
   const [showModifierModal, setShowModifierModal] = useState(false);
   const [modifierDieIndex, setModifierDieIndex] = useState<number | null>(null);
   const [modifierValue, setModifierValue] = useState('');
+  const [showQuantityModal, setShowQuantityModal] = useState(false);
+  const [quantityDieIndex, setQuantityDieIndex] = useState<number | null>(null);
+  const [quantityValue, setQuantityValue] = useState('');
+  const modifierInputRef = useRef<TextInput>(null);
+  const quantityInputRef = useRef<TextInput>(null);
 
   const addDie = () => {
     onDiceChange([...currentDice, { sides: 6, quantity: 1, modifier: 0 }]);
@@ -109,8 +114,30 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
 
   const openModifierModal = (index: number) => {
     setModifierDieIndex(index);
-    setModifierValue((currentDice[index].modifier || 0).toString());
+    const value = (currentDice[index].modifier || 0).toString();
+    setModifierValue(value);
     setShowModifierModal(true);
+    // Multiple attempts to ensure focus and selection work
+    setTimeout(() => {
+      modifierInputRef.current?.focus();
+      setTimeout(() => {
+        modifierInputRef.current?.setSelection(0, value.length);
+      }, 50);
+    }, 200);
+  };
+
+  const openQuantityModal = (index: number) => {
+    setQuantityDieIndex(index);
+    const value = currentDice[index].quantity.toString();
+    setQuantityValue(value);
+    setShowQuantityModal(true);
+    // Multiple attempts to ensure focus and selection work
+    setTimeout(() => {
+      quantityInputRef.current?.focus();
+      setTimeout(() => {
+        quantityInputRef.current?.setSelection(0, value.length);
+      }, 50);
+    }, 200);
   };
 
   const handleModifierSubmit = () => {
@@ -120,6 +147,16 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
       setShowModifierModal(false);
       setModifierValue('');
       setModifierDieIndex(null);
+    }
+  };
+
+  const handleQuantitySubmit = () => {
+    if (quantityDieIndex !== null) {
+      const value = parseInt(quantityValue) || 1;
+      updateDie(quantityDieIndex, { quantity: Math.max(1, Math.min(20, value)) });
+      setShowQuantityModal(false);
+      setQuantityValue('');
+      setQuantityDieIndex(null);
     }
   };
 
@@ -272,34 +309,31 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
             <View style={{ paddingVertical: 8 }}>
               {currentDice.map((die, index) => (
                 <View key={index} style={[styles.row, { paddingVertical: 16, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.borderLight, minHeight: 80 }]}>
-                  {/* Quantity Input */}
+                  {/* Quantity Button */}
                   <View style={{ flex: 1, alignItems: 'center' }}>
-                    <TextInput
-                      style={[
+                    <Pressable
+                      style={({ pressed }) => [
                         styles.numberInput,
-                        focusedInput === `quantity-${index}` && styles.numberInputFocused,
                         { 
                           width: '80%', 
                           height: 48, 
-                          textAlign: 'center',
-                          fontSize: 18,
-                          fontWeight: '600',
-                          color: colors.text,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          backgroundColor: pressed ? colors.borderLight : colors.surface,
                           paddingVertical: 8,
-                          paddingHorizontal: 4
+                          paddingHorizontal: 4,
                         }
                       ]}
-                      value={die.quantity.toString()}
-                      onChangeText={(text) => {
-                        const num = parseInt(text) || 1;
-                        updateDie(index, { quantity: Math.max(1, Math.min(20, num)) });
-                      }}
-                      onFocus={() => setFocusedInput(`quantity-${index}`)}
-                      onBlur={() => setFocusedInput(null)}
-                      keyboardType="numeric"
-                      maxLength={2}
-                      selectTextOnFocus
-                    />
+                      onPress={() => openQuantityModal(index)}
+                    >
+                      <Text style={{ 
+                        fontSize: 18, 
+                        fontWeight: '600', 
+                        color: colors.text
+                      }}>
+                        {die.quantity}
+                      </Text>
+                    </Pressable>
                   </View>
                   
                   {/* Die Type Display + Picker */}
@@ -558,6 +592,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
             </Text>
             
             <TextInput
+              ref={modifierInputRef}
               style={[
                 styles.textInput,
                 focusedInput === 'modifier' && styles.textInputFocused,
@@ -567,7 +602,13 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
               placeholderTextColor={colors.textLight}
               value={modifierValue}
               onChangeText={setModifierValue}
-              onFocus={() => setFocusedInput('modifier')}
+              onFocus={() => {
+                setFocusedInput('modifier');
+                // Additional selection attempt on focus
+                setTimeout(() => {
+                  modifierInputRef.current?.setSelection(0, modifierValue.length);
+                }, 10);
+              }}
               onBlur={() => setFocusedInput(null)}
               keyboardType="numbers-and-punctuation"
               returnKeyType="done"
@@ -605,6 +646,88 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
               >
                 <Text style={styles.smallButtonText}>
                   Set Modifier
+                </Text>
+              </Pressable>
+            </View>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Quantity Modal */}
+      <Modal
+        visible={showQuantityModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowQuantityModal(false)}
+      >
+        <KeyboardAvoidingView 
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+            <View style={[styles.card, { width: '100%', maxWidth: 400 }]}>
+            <Text style={[styles.sectionTitle, { marginBottom: 16, textAlign: 'center' }]}>Set quantity</Text>
+            
+            <Text style={[styles.inputLabel, { marginBottom: 8, textAlign: 'center' }]}>
+              Enter number of dice (1-20)
+            </Text>
+            
+            <TextInput
+              ref={quantityInputRef}
+              style={[
+                styles.textInput,
+                focusedInput === 'quantity' && styles.textInputFocused,
+                { marginBottom: 20 }
+              ]}
+              placeholder="Enter quantity (e.g., 1, 2, 5)"
+              placeholderTextColor={colors.textLight}
+              value={quantityValue}
+              onChangeText={setQuantityValue}
+              onFocus={() => {
+                setFocusedInput('quantity');
+                // Additional selection attempt on focus
+                setTimeout(() => {
+                  quantityInputRef.current?.setSelection(0, quantityValue.length);
+                }, 10);
+              }}
+              onBlur={() => setFocusedInput(null)}
+              keyboardType="numeric"
+              returnKeyType="done"
+              onSubmitEditing={handleQuantitySubmit}
+              autoFocus={true}
+              selectTextOnFocus
+            />
+            
+            <View style={[styles.row, { gap: 12 }]}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.button,
+                  styles.smallButton,
+                  { flex: 1, backgroundColor: colors.textLight },
+                  pressed && { backgroundColor: colors.border }
+                ]}
+                onPress={() => {
+                  setShowQuantityModal(false);
+                  setQuantityValue('');
+                  setQuantityDieIndex(null);
+                }}
+              >
+                <Text style={[styles.smallButtonText, { color: 'white' }]}>Cancel</Text>
+              </Pressable>
+              
+              <Pressable
+                style={({ pressed }) => [
+                  styles.button,
+                  styles.smallButton,
+                  styles.successButton,
+                  pressed && styles.successButtonPressed,
+                  { flex: 1 }
+                ]}
+                onPress={handleQuantitySubmit}
+              >
+                <Text style={styles.smallButtonText}>
+                  Set Quantity
                 </Text>
               </Pressable>
             </View>

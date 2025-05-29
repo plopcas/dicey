@@ -10,11 +10,11 @@ import { SettingsProvider, useSettings } from './contexts/SettingsContext';
 import { validateDiceConfiguration } from './shared/utils';
 import './App.css';
 
-type Tab = 'builder' | 'saved' | 'history' | 'statistics';
+type Tab = 'roll' | 'saved' | 'history' | 'statistics';
 
 const AppContent: React.FC = () => {
   const { soundEnabled, modifiersEnabled, setSoundEnabled, setModifiersEnabled } = useSettings();
-  const [activeTab, setActiveTab] = useState<Tab>('builder');
+  const [activeTab, setActiveTab] = useState<Tab>('roll');
   const [configurations, setConfigurations] = useState<DiceConfiguration[]>([]);
   const [rollHistory, setRollHistory] = useState<RollResult[]>([]);
   const [lastRoll, setLastRoll] = useState<RollResult | null>(null);
@@ -29,7 +29,7 @@ const AppContent: React.FC = () => {
 
   // Keyboard shortcut for rolling dice
   const handleKeyPress = useCallback((event: KeyboardEvent) => {
-    if (event.code === 'Space' && activeTab === 'builder' && validateDiceConfiguration(currentDice)) {
+    if (event.code === 'Space' && activeTab === 'roll' && validateDiceConfiguration(currentDice)) {
       event.preventDefault();
       handleRoll(currentDice);
     }
@@ -106,7 +106,7 @@ const AppContent: React.FC = () => {
         // Rolling a saved configuration - switch to builder tab to show result
         result = await diceService.rollDice(dice, modifiersEnabled);
         setCurrentDice(dice.dice); // Load the dice configuration
-        setActiveTab('builder');
+        setActiveTab('roll');
       } else {
         // Rolling a temporary configuration
         const tempConfig: DiceConfiguration = {
@@ -150,10 +150,10 @@ const AppContent: React.FC = () => {
 
       <nav className="app-nav" style={{ position: 'relative' }}>
         <button
-          className={`nav-btn ${activeTab === 'builder' ? 'active' : ''}`}
-          onClick={() => setActiveTab('builder')}
+          className={`nav-btn ${activeTab === 'roll' ? 'active' : ''}`}
+          onClick={() => setActiveTab('roll')}
         >
-          Builder
+          Roll
         </button>
         <button
           className={`nav-btn ${activeTab === 'saved' ? 'active' : ''}`}
@@ -184,7 +184,7 @@ const AppContent: React.FC = () => {
             background: 'none',
             border: 'none',
             color: 'black',
-            fontSize: '20px',
+            fontSize: '24px',
             cursor: 'pointer',
             padding: '8px',
             borderRadius: '4px'
@@ -201,7 +201,7 @@ const AppContent: React.FC = () => {
           </div>
         ) : (
           <div className="content-container">
-            {activeTab === 'builder' ? (
+            {activeTab === 'roll' ? (
               <>
                 <div className="primary-content">
                   <RollResultComponent result={lastRoll} onRoll={handleRoll} currentDice={currentDice} isRolling={isRolling} />

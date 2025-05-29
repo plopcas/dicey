@@ -25,10 +25,12 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
 
   const formatTime = (date: Date) => {
     return date.toLocaleString(undefined, {
+      year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+      second: '2-digit',
     });
   };
 
@@ -69,55 +71,64 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
         
         <View style={styles.list}>
           {history.map((roll) => (
-            <View key={roll.id} style={styles.listItem}>
-              <View style={styles.listItemHeader}>
-                <Text style={styles.listItemTitle} numberOfLines={1}>
-                  {formatTime(roll.timestamp)}
-                </Text>
-                <View style={[styles.totalContainer, { minWidth: 'auto', paddingHorizontal: 12, paddingVertical: 4 }]}>
-                  <Text style={[styles.totalValue, { fontSize: 20 }]}>
+            <View key={roll.id} style={[styles.listItem, { paddingVertical: 12 }]}>
+              <Text style={[styles.listItemMeta, { fontSize: 12, color: colors.textSecondary, marginBottom: 8 }]}>
+                {formatTime(roll.timestamp)}
+              </Text>
+              
+              <View style={[styles.row, { alignItems: 'center', justifyContent: 'space-between' }]}>
+                <View style={[styles.individualRolls, { flex: 1, justifyContent: 'flex-start' }]}>
+                  {roll.results.map((dieGroup, dieIndex) => 
+                    dieGroup.map((rollValue, rollIndex) => {
+                      const modifier = roll.modifiers ? roll.modifiers[dieIndex] : 0;
+                      const hasModifier = settings.modifiersEnabled && modifier !== 0;
+                      const modifiedTotal = rollValue + modifier;
+                      
+                      if (hasModifier) {
+                        return (
+                          <Text 
+                            key={`${dieIndex}-${rollIndex}`}
+                            style={[
+                              styles.rollValue,
+                              {
+                                backgroundColor: modifier > 0 ? colors.success : colors.danger,
+                                fontSize: 14,
+                                minWidth: 32,
+                                paddingVertical: 4,
+                                paddingHorizontal: 6
+                              }
+                            ]}
+                          >
+                            {modifiedTotal}
+                          </Text>
+                        );
+                      } else {
+                        return (
+                          <Text 
+                            key={`${dieIndex}-${rollIndex}`} 
+                            style={[
+                              styles.rollValue,
+                              {
+                                fontSize: 14,
+                                minWidth: 32,
+                                paddingVertical: 4,
+                                paddingHorizontal: 6
+                              }
+                            ]}
+                          >
+                            {rollValue}
+                          </Text>
+                        );
+                      }
+                    })
+                  )}
+                </View>
+                
+                <View style={[styles.totalContainer, { minWidth: 'auto', paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.surface }]}>
+                  <Text style={[styles.totalValue, { fontSize: 18, fontWeight: 'bold', color: colors.primary }]}>
                     {roll.total}
                   </Text>
                 </View>
-              </View>
-              
-              <View style={{ marginVertical: 8 }}>
-                {roll.dice.map((die, dieIndex) => (
-                  <View key={dieIndex} style={{ marginBottom: 4 }}>
-                    <Text style={[styles.listItemMeta, { marginBottom: 4 }]}>
-                      {die.quantity}D{die.sides}:
-                    </Text>
-                    <View style={styles.individualRolls}>
-                      {roll.results[dieIndex].map((rollValue, rollIndex) => {
-                        const modifier = roll.modifiers ? roll.modifiers[dieIndex] : 0;
-                        const hasModifier = settings.modifiersEnabled && modifier !== 0;
-                        const modifiedTotal = rollValue + modifier;
-                        
-                        if (hasModifier) {
-                          return (
-                            <Text 
-                              key={rollIndex}
-                              style={[
-                                styles.rollValue,
-                                {
-                                  backgroundColor: modifier > 0 ? colors.success : colors.danger,
-                                }
-                              ]}
-                            >
-                              {modifiedTotal}({rollValue}{modifier > 0 ? '+' : ''}{modifier})
-                            </Text>
-                          );
-                        } else {
-                          return (
-                            <Text key={rollIndex} style={styles.rollValue}>
-                              {rollValue}
-                            </Text>
-                          );
-                        }
-                      })}
-                    </View>
-                  </View>
-                ))}
               </View>
             </View>
           ))}
