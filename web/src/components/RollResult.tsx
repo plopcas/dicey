@@ -35,10 +35,21 @@ export const RollResult: React.FC<RollResultProps> = ({ result, onRoll, currentD
           </div>
 
           <div className="dice-results">
-            {result.results.flat().map((roll, index) => (
-              <span key={index} className="roll-value">
-                {roll}
-              </span>
+            {result.results.map((dieGroup, dieIndex) => (
+              <div key={dieIndex} className="die-group-results">
+                {dieGroup.map((roll, rollIndex) => (
+                  <span key={rollIndex} className="roll-value">
+                    {roll}
+                  </span>
+                ))}
+                {result.modifiers[dieIndex] !== 0 && (
+                  <span 
+                    className={`roll-value modifier ${result.modifiers[dieIndex] > 0 ? 'positive' : 'negative'}`}
+                  >
+                    {result.modifiers[dieIndex] > 0 ? '+' : ''}{result.modifiers[dieIndex]}
+                  </span>
+                )}
+              </div>
             ))}
           </div>
 

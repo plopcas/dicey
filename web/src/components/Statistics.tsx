@@ -80,23 +80,6 @@ export const Statistics: React.FC<StatisticsProps> = ({ history }) => {
           ))}
         </div>
       </div>
-      
-      <div className="recent-rolls">
-        <h3>Recent Trends</h3>
-        <div className="trend-line">
-          {history.slice(0, 20).reverse().map((roll, index) => (
-            <div 
-              key={roll.id} 
-              className="trend-point"
-              style={{
-                height: `${(roll.total / max) * 100}px`,
-                minHeight: '10px'
-              }}
-              title={`Roll ${index + 1}: ${roll.total}`}
-            />
-          ))}
-        </div>
-      </div>
     </div>
   );
 };

@@ -31,6 +31,7 @@ export const rollSingleDie = (sides: number): number => {
 
 export const rollDice = (configuration: DiceConfiguration): RollResult => {
   const results: number[][] = [];
+  const modifiers: number[] = [];
   let total = 0;
 
   configuration.dice.forEach((die) => {
@@ -40,11 +41,12 @@ export const rollDice = (configuration: DiceConfiguration): RollResult => {
       dieResults.push(roll);
       total += roll;
     }
-    // Add modifier to total (not to individual rolls)
-    if (die.modifier) {
-      total += die.modifier;
-    }
     results.push(dieResults);
+    
+    // Track modifier for this die group
+    const modifier = die.modifier || 0;
+    modifiers.push(modifier);
+    total += modifier;
   });
 
   return {
@@ -53,6 +55,7 @@ export const rollDice = (configuration: DiceConfiguration): RollResult => {
     configurationName: configuration.name,
     dice: configuration.dice,
     results,
+    modifiers,
     total,
     timestamp: new Date(),
   };

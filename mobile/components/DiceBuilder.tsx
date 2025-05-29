@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, ScrollView, Alert, Pressable, Modal } from 'react-native';
+import { View, Text, TextInput, ScrollView, Alert, Pressable, Modal, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { Die, DICE_TYPES, RollResult } from '../shared/types';
 import { formatDiceConfiguration, validateDiceConfiguration } from '../shared/utils';
+import { useSettings } from '../contexts/SettingsContext';
 import { styles, colors } from '../styles/styles';
 
 interface DiceBuilderProps {
@@ -15,6 +16,7 @@ interface DiceBuilderProps {
 }
 
 export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRoll, currentDice, onDiceChange, isRolling }) => {
+  const { settings } = useSettings();
   const [configName, setConfigName] = useState('');
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showCustomDieModal, setShowCustomDieModal] = useState(false);
@@ -86,9 +88,14 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
     }
   };
 
+  const isCustomDieValid = () => {
+    const sides = parseInt(customDieSides);
+    return !isNaN(sides) && sides > 0;
+  };
+
   const handleCustomDieSubmit = () => {
     const sides = parseInt(customDieSides);
-    if (sides > 0 && customDieIndex !== null) {
+    if (isCustomDieValid() && customDieIndex !== null) {
       updateDie(customDieIndex, { sides });
       setShowCustomDieModal(false);
       setCustomDieSides('');
@@ -133,11 +140,28 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
               </Text>
             </View>
             <View style={styles.individualRolls}>
-              {lastRoll.results.flat().map((roll, index) => (
-                <Text key={index} style={styles.rollValue}>
-                  {roll}
-                </Text>
-              ))}
+              {lastRoll.results.map((dieGroup, dieIndex) => 
+                dieGroup.map((roll, rollIndex) => (
+                  <Text key={`${dieIndex}-${rollIndex}`} style={styles.rollValue}>
+                    {roll}
+                  </Text>
+                ))
+              )}
+              {settings.modifiersEnabled && lastRoll.modifiers && lastRoll.modifiers.map((modifier, dieIndex) => 
+                modifier !== 0 ? (
+                  <Text 
+                    key={`modifier-${dieIndex}`}
+                    style={[
+                      styles.rollValue,
+                      {
+                        backgroundColor: modifier > 0 ? colors.success : colors.danger,
+                      }
+                    ]}
+                  >
+                    {modifier > 0 ? '+' : ''}{modifier}
+                  </Text>
+                ) : null
+              )}
             </View>
           </View>
         )}
@@ -214,6 +238,9 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
             <View style={[styles.row, { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.border }]}>
               <Text style={[styles.inputLabel, { flex: 1, textAlign: 'center' }]}>Qty</Text>
               <Text style={[styles.inputLabel, { flex: 1, textAlign: 'center' }]}>Die Type</Text>
+              {settings.modifiersEnabled && (
+                <Text style={[styles.inputLabel, { flex: 1, textAlign: 'center' }]}>Modifier</Text>
+              )}
               <Text style={[styles.inputLabel, { width: 60, textAlign: 'center' }]}>Action</Text>
             </View>
 
@@ -295,6 +322,40 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
                       </Picker>
                     </View>
                   </View>
+
+                  {/* Modifier Input */}
+                  {settings.modifiersEnabled && (
+                    <View style={{ flex: 1, alignItems: 'center' }}>
+                      <TextInput
+                        style={[
+                          styles.numberInput,
+                          focusedInput === `modifier-${index}` && styles.numberInputFocused,
+                          { 
+                            width: '80%', 
+                            height: 48, 
+                            textAlign: 'center',
+                            fontSize: 18,
+                            fontWeight: '600',
+                            color: colors.text,
+                            paddingVertical: 8,
+                            paddingHorizontal: 4
+                          }
+                        ]}
+                        value={(die.modifier || 0).toString()}
+                        onChangeText={(text) => {
+                          const num = parseInt(text) || 0;
+                          updateDie(index, { modifier: Math.max(-99, Math.min(99, num)) });
+                        }}
+                        onFocus={() => setFocusedInput(`modifier-${index}`)}
+                        onBlur={() => setFocusedInput(null)}
+                        keyboardType="numeric"
+                        maxLength={3}
+                        selectTextOnFocus
+                        placeholder="0"
+                        placeholderTextColor={colors.textLight}
+                      />
+                    </View>
+                  )}
 
                   {/* Remove Button */}
                   <View style={{ width: 60, alignItems: 'center' }}>
@@ -388,8 +449,12 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
         animationType="fade"
         onRequestClose={() => setShowCustomDieModal(false)}
       >
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <View style={[styles.card, { width: '100%', maxWidth: 400 }]}>
+        <KeyboardAvoidingView 
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+            <View style={[styles.card, { width: '100%', maxWidth: 400 }]}>
             <Text style={[styles.sectionTitle, { marginBottom: 16, textAlign: 'center' }]}>Custom Die</Text>
             
             <Text style={[styles.inputLabel, { marginBottom: 8, textAlign: 'center' }]}>
@@ -412,6 +477,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
               returnKeyType="done"
               onSubmitEditing={handleCustomDieSubmit}
               autoFocus={true}
+              blurOnSubmit={false}
             />
             
             <View style={[styles.row, { gap: 12 }]}>
@@ -436,20 +502,21 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
                   styles.button,
                   styles.smallButton,
                   styles.successButton,
-                  (!customDieSides.trim() || parseInt(customDieSides) < 2) && styles.disabledButton,
-                  pressed && customDieSides.trim() && parseInt(customDieSides) >= 2 && styles.successButtonPressed,
+                  !isCustomDieValid() && styles.disabledButton,
+                  pressed && isCustomDieValid() && styles.successButtonPressed,
                   { flex: 1 }
                 ]}
                 onPress={handleCustomDieSubmit}
-                disabled={!customDieSides.trim() || parseInt(customDieSides) < 2}
+                disabled={!isCustomDieValid()}
               >
                 <Text style={styles.smallButtonText}>
                   Create D{customDieSides || '?'}
                 </Text>
               </Pressable>
             </View>
+            </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </ScrollView>
   );

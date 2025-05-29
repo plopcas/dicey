@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Pressable, SafeAreaView, StatusBar, ActivityIndicator } from 'react-native';
+import { Audio } from 'expo-av';
+import * as Haptics from 'expo-haptics';
 import { DiceConfiguration, RollResult, Die } from './shared/types';
 import { mobileDiceService } from './services/diceService';
 import { DiceBuilder } from './components/DiceBuilder';
 import { SavedConfigurations } from './components/SavedConfigurations';
 import { RollHistory } from './components/RollHistory';
+import { Statistics } from './components/Statistics';
+import { SettingsModal } from './components/SettingsModal';
+import { SettingsProvider, useSettings } from './contexts/SettingsContext';
 import { styles, colors } from './styles/styles';
 
-type Tab = 'builder' | 'saved' | 'history';
+type Tab = 'builder' | 'saved' | 'history' | 'statistics';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const { settings } = useSettings();
   const [activeTab, setActiveTab] = useState<Tab>('builder');
   const [configurations, setConfigurations] = useState<DiceConfiguration[]>([]);
   const [rollHistory, setRollHistory] = useState<RollResult[]>([]);
@@ -17,10 +23,30 @@ const App: React.FC = () => {
   const [currentDice, setCurrentDice] = useState<Die[]>([]);
   const [loading, setLoading] = useState(true);
   const [isRolling, setIsRolling] = useState(false);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     loadData();
+    loadSound();
+    
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
   }, []);
+
+  const loadSound = async () => {
+    try {
+      const { sound: loadedSound } = await Audio.Sound.createAsync(
+        require('./assets/dice-142528.mp3')
+      );
+      setSound(loadedSound);
+    } catch (error) {
+      console.error('Error loading sound:', error);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -72,6 +98,20 @@ const App: React.FC = () => {
     try {
       setIsRolling(true);
       console.log('Rolling dice:', dice);
+      
+      // Add haptic feedback if enabled
+      if (settings.animationEnabled) {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+      
+      // Play sound if enabled
+      if (settings.soundEnabled && sound) {
+        try {
+          await sound.replayAsync();
+        } catch (error) {
+          console.error('Error playing sound:', error);
+        }
+      }
       
       // Add a delay for animation effect
       await new Promise(resolve => setTimeout(resolve, 400));
@@ -154,6 +194,12 @@ const App: React.FC = () => {
             onClear={handleClearHistory}
           />
         );
+      case 'statistics':
+        return (
+          <Statistics
+            history={rollHistory}
+          />
+        );
       default:
         return null;
     }
@@ -167,6 +213,8 @@ const App: React.FC = () => {
         return `Saved (${configurations.length})`;
       case 'history':
         return `History (${rollHistory.length})`;
+      case 'statistics':
+        return 'Statistics';
       default:
         return '';
     }
@@ -178,15 +226,28 @@ const App: React.FC = () => {
       
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>🎲 Dicey</Text>
-        <Text style={styles.headerSubtitle}>
-          Your digital dice rolling companion
-        </Text>
+        <View style={[styles.row, styles.spaceBetween, { width: '100%' }]}>
+          <View style={{ flex: 1 }} />
+          <View style={styles.center}>
+            <Text style={styles.headerTitle}>🎲 Dicey</Text>
+            <Text style={styles.headerSubtitle}>
+              Your digital dice rolling companion
+            </Text>
+          </View>
+          <View style={{ flex: 1, alignItems: 'flex-end' }}>
+            <Pressable 
+              style={styles.settingsIcon}
+              onPress={() => setShowSettings(true)}
+            >
+              <Text style={{ fontSize: 24, color: 'white' }}>⚙️</Text>
+            </Pressable>
+          </View>
+        </View>
       </View>
 
       {/* Tab Navigation */}
       <View style={styles.tabContainer}>
-        {(['builder', 'saved', 'history'] as Tab[]).map((tab) => (
+        {(['builder', 'saved', 'history', 'statistics'] as Tab[]).map((tab) => (
           <Pressable
             key={tab}
             style={[
@@ -214,7 +275,21 @@ const App: React.FC = () => {
         {renderTabContent()}
       </View>
 
+      {/* Settings Modal */}
+      <SettingsModal 
+        visible={showSettings} 
+        onClose={() => setShowSettings(false)} 
+      />
+
     </SafeAreaView>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <SettingsProvider>
+      <AppContent />
+    </SettingsProvider>
   );
 };
 

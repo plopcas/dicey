@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import { RollResult } from '../shared/types';
 import { formatDiceConfiguration } from '../shared/utils';
+import { useSettings } from '../contexts/SettingsContext';
 import { styles, colors } from '../styles/styles';
 
 interface RollHistoryProps {
@@ -10,6 +11,8 @@ interface RollHistoryProps {
 }
 
 export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) => {
+  const { settings } = useSettings();
+  
   const handleClear = () => {
     Alert.alert(
       'Clear History',
@@ -95,6 +98,18 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
                           {rollValue}
                         </Text>
                       ))}
+                      {settings.modifiersEnabled && roll.modifiers && roll.modifiers[dieIndex] !== 0 && (
+                        <Text 
+                          style={[
+                            styles.rollValue,
+                            {
+                              backgroundColor: roll.modifiers[dieIndex] > 0 ? colors.success : colors.danger,
+                            }
+                          ]}
+                        >
+                          {roll.modifiers[dieIndex] > 0 ? '+' : ''}{roll.modifiers[dieIndex]}
+                        </Text>
+                      )}
                     </View>
                   </View>
                 ))}

@@ -16,6 +16,7 @@ export interface RollResult {
   configurationName: string;
   dice: Die[];
   results: number[][];
+  modifiers: number[];
   total: number;
   timestamp: Date;
 }

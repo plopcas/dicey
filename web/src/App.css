@@ -435,9 +435,15 @@ body {
 
 .dice-results {
   display: flex;
-  gap: 0.5rem;
+  gap: 1rem;
   flex-wrap: wrap;
   margin-bottom: 1rem;
+}
+
+.die-group-results {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .roll-value {
@@ -450,6 +456,19 @@ body {
   text-align: center;
   font-size: 1.1rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.roll-value.modifier.positive {
+  background: #28a745;
+}
+
+.roll-value.modifier.negative {
+  background: #dc3545;
+}
+
+.roll-value.modifier {
+  min-width: 50px;
+  font-size: 1rem;
 }
 
 .roll-timestamp {
@@ -475,8 +494,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-height: 600px;
-  overflow-y: auto;
 }
 
 .history-item {
