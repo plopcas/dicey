@@ -3,12 +3,10 @@ import { rollDice, generateId } from '../shared/utils';
 import { MobileStorageService } from './storage';
 
 export class MobileDiceService implements DiceRollService {
-  rollDice(configuration: DiceConfiguration): RollResult {
+  async rollDice(configuration: DiceConfiguration): Promise<RollResult> {
     const result = rollDice(configuration);
-    // Save roll asynchronously - don't wait for it to complete
-    this.saveRoll(result).catch(error => {
-      console.error('Error saving roll:', error);
-    });
+    // Save roll and wait for it to complete
+    await this.saveRoll(result);
     return result;
   }
 

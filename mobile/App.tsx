@@ -74,7 +74,7 @@ const App: React.FC = () => {
       
       if ('id' in dice) {
         // Rolling a saved configuration - navigate to builder tab to show result
-        result = mobileDiceService.rollDice(dice);
+        result = await mobileDiceService.rollDice(dice);
         setCurrentDice(dice.dice); // Load the dice configuration
         setActiveTab('builder');
       } else {
@@ -85,16 +85,15 @@ const App: React.FC = () => {
           dice,
           createdAt: new Date(),
         };
-        result = mobileDiceService.rollDice(tempConfig);
+        result = await mobileDiceService.rollDice(tempConfig);
         setCurrentDice(dice); // Update current dice state
       }
       
       console.log('Roll result:', result);
       setLastRoll(result);
       
-      // Update roll history immediately to refresh tab count
-      const updatedHistory = await mobileDiceService.getRollHistory();
-      setRollHistory(updatedHistory);
+      // Update roll history count immediately
+      setRollHistory(prev => [result, ...prev]);
     } catch (error) {
       console.error('Error rolling dice:', error);
     }
@@ -185,17 +184,8 @@ const App: React.FC = () => {
               styles.tab,
               activeTab === tab && styles.activeTab,
             ]}
-            onPress={async () => {
+            onPress={() => {
               setActiveTab(tab);
-              // Only refresh data when switching to saved or history tabs
-              if (tab === 'saved' || tab === 'history') {
-                const [newConfigs, newHistory] = await Promise.all([
-                  mobileDiceService.getConfigurations(),
-                  mobileDiceService.getRollHistory()
-                ]);
-                setConfigurations(newConfigs);
-                setRollHistory(newHistory);
-              }
             }}
           >
             <Text
