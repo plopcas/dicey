@@ -23,6 +23,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
   const [customDieSides, setCustomDieSides] = useState('');
   const [customDieIndex, setCustomDieIndex] = useState<number | null>(null);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  const [modifierInputs, setModifierInputs] = useState<{ [key: number]: string }>({});
 
   const addDie = () => {
     onDiceChange([...currentDice, { sides: 6, quantity: 1, modifier: 0 }]);
@@ -141,26 +142,33 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
             </View>
             <View style={styles.individualRolls}>
               {lastRoll.results.map((dieGroup, dieIndex) => 
-                dieGroup.map((roll, rollIndex) => (
-                  <Text key={`${dieIndex}-${rollIndex}`} style={styles.rollValue}>
-                    {roll}
-                  </Text>
-                ))
-              )}
-              {settings.modifiersEnabled && lastRoll.modifiers && lastRoll.modifiers.map((modifier, dieIndex) => 
-                modifier !== 0 ? (
-                  <Text 
-                    key={`modifier-${dieIndex}`}
-                    style={[
-                      styles.rollValue,
-                      {
-                        backgroundColor: modifier > 0 ? colors.success : colors.danger,
-                      }
-                    ]}
-                  >
-                    {modifier > 0 ? '+' : ''}{modifier}
-                  </Text>
-                ) : null
+                dieGroup.map((roll, rollIndex) => {
+                  const modifier = lastRoll.modifiers ? lastRoll.modifiers[dieIndex] : 0;
+                  const hasModifier = settings.modifiersEnabled && modifier !== 0;
+                  const modifiedTotal = roll + modifier;
+                  
+                  if (hasModifier) {
+                    return (
+                      <Text 
+                        key={`${dieIndex}-${rollIndex}`} 
+                        style={[
+                          styles.rollValue,
+                          {
+                            backgroundColor: modifier > 0 ? colors.success : colors.danger,
+                          }
+                        ]}
+                      >
+                        {modifiedTotal}({roll}{modifier > 0 ? '+' : ''}{modifier})
+                      </Text>
+                    );
+                  } else {
+                    return (
+                      <Text key={`${dieIndex}-${rollIndex}`} style={styles.rollValue}>
+                        {roll}
+                      </Text>
+                    );
+                  }
+                })
               )}
             </View>
           </View>
@@ -341,14 +349,39 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
                             paddingHorizontal: 4
                           }
                         ]}
-                        value={(die.modifier || 0).toString()}
+                        value={modifierInputs[index] !== undefined ? modifierInputs[index] : (die.modifier || 0).toString()}
                         onChangeText={(text) => {
-                          const num = parseInt(text) || 0;
-                          updateDie(index, { modifier: Math.max(-99, Math.min(99, num)) });
+                          setModifierInputs({ ...modifierInputs, [index]: text });
+                          
+                          // Update the die if it's a valid number or empty
+                          if (text === '' || text === '-') {
+                            updateDie(index, { modifier: 0 });
+                          } else {
+                            const num = parseInt(text);
+                            if (!isNaN(num) && num >= -99 && num <= 99) {
+                              updateDie(index, { modifier: num });
+                            }
+                          }
                         }}
-                        onFocus={() => setFocusedInput(`modifier-${index}`)}
-                        onBlur={() => setFocusedInput(null)}
-                        keyboardType="numeric"
+                        onFocus={() => {
+                          setFocusedInput(`modifier-${index}`);
+                          // Clear the input if it shows 0
+                          if (die.modifier === 0) {
+                            setModifierInputs({ ...modifierInputs, [index]: '' });
+                          }
+                        }}
+                        onBlur={() => {
+                          setFocusedInput(null);
+                          // Clean up the input state and ensure we have a valid number
+                          const currentInput = modifierInputs[index];
+                          if (currentInput === '' || currentInput === undefined) {
+                            updateDie(index, { modifier: 0 });
+                          }
+                          const newInputs = { ...modifierInputs };
+                          delete newInputs[index];
+                          setModifierInputs(newInputs);
+                        }}
+                        keyboardType="numbers-and-punctuation"
                         maxLength={3}
                         selectTextOnFocus
                         placeholder="0"

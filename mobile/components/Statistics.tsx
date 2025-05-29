@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { RollResult } from '../shared/types';
+import { useSettings } from '../contexts/SettingsContext';
 import { styles, colors } from '../styles/styles';
 
 interface StatisticsProps {

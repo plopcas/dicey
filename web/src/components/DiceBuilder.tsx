@@ -15,6 +15,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, curren
   const [showCustomDieModal, setShowCustomDieModal] = useState(false);
   const [customDieSides, setCustomDieSides] = useState('');
   const [customDieIndex, setCustomDieIndex] = useState<number | null>(null);
+  const [modifierInputs, setModifierInputs] = useState<{ [key: number]: string }>({});
 
   const addDie = () => {
     onDiceChange([...currentDice, { sides: 6, quantity: 1, modifier: 0 }]);
@@ -150,12 +151,42 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, curren
                 </select>
                 
                 <input
-                  type="number"
-                  min="-99"
-                  max="99"
-                  value={die.modifier || 0}
-                  onChange={(e) => updateDie(index, { modifier: parseInt(e.target.value) || 0 })}
+                  type="text"
+                  value={modifierInputs[index] !== undefined ? modifierInputs[index] : (die.modifier || 0).toString()}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setModifierInputs({ ...modifierInputs, [index]: value });
+                    
+                    // Update the die if it's a valid number or empty
+                    if (value === '' || value === '-') {
+                      updateDie(index, { modifier: 0 });
+                    } else {
+                      const num = parseInt(value);
+                      if (!isNaN(num) && num >= -99 && num <= 99) {
+                        updateDie(index, { modifier: num });
+                      }
+                    }
+                  }}
+                  onFocus={(e) => {
+                    // Clear the input if it shows 0
+                    if (die.modifier === 0) {
+                      setModifierInputs({ ...modifierInputs, [index]: '' });
+                    }
+                    e.target.select();
+                  }}
+                  onBlur={() => {
+                    // Clean up the input state and ensure we have a valid number
+                    const currentInput = modifierInputs[index];
+                    if (currentInput === '' || currentInput === undefined) {
+                      updateDie(index, { modifier: 0 });
+                    }
+                    const newInputs = { ...modifierInputs };
+                    delete newInputs[index];
+                    setModifierInputs(newInputs);
+                  }}
                   placeholder="±0"
+                  title="Enter modifier value (positive or negative)"
+                  style={{ width: '80px', textAlign: 'center' }}
                 />
                 
                 <button onClick={() => removeDie(index)} className="remove-btn">

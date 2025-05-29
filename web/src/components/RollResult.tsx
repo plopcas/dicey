@@ -37,18 +37,28 @@ export const RollResult: React.FC<RollResultProps> = ({ result, onRoll, currentD
           <div className="dice-results">
             {result.results.map((dieGroup, dieIndex) => (
               <div key={dieIndex} className="die-group-results">
-                {dieGroup.map((roll, rollIndex) => (
-                  <span key={rollIndex} className="roll-value">
-                    {roll}
-                  </span>
-                ))}
-                {result.modifiers[dieIndex] !== 0 && (
-                  <span 
-                    className={`roll-value modifier ${result.modifiers[dieIndex] > 0 ? 'positive' : 'negative'}`}
-                  >
-                    {result.modifiers[dieIndex] > 0 ? '+' : ''}{result.modifiers[dieIndex]}
-                  </span>
-                )}
+                {dieGroup.map((roll, rollIndex) => {
+                  const modifier = result.modifiers[dieIndex];
+                  const hasModifier = modifier !== 0;
+                  const modifiedTotal = roll + modifier;
+                  
+                  if (hasModifier) {
+                    return (
+                      <span 
+                        key={rollIndex} 
+                        className={`roll-value modifier ${modifier > 0 ? 'positive' : 'negative'}`}
+                      >
+                        {modifiedTotal}({roll}{modifier > 0 ? '+' : ''}{modifier})
+                      </span>
+                    );
+                  } else {
+                    return (
+                      <span key={rollIndex} className="roll-value">
+                        {roll}
+                      </span>
+                    );
+                  }
+                })}
               </div>
             ))}
           </div>

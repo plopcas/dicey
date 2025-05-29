@@ -93,23 +93,33 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
                       {die.quantity}D{die.sides}:
                     </Text>
                     <View style={styles.individualRolls}>
-                      {roll.results[dieIndex].map((rollValue, rollIndex) => (
-                        <Text key={rollIndex} style={styles.rollValue}>
-                          {rollValue}
-                        </Text>
-                      ))}
-                      {settings.modifiersEnabled && roll.modifiers && roll.modifiers[dieIndex] !== 0 && (
-                        <Text 
-                          style={[
-                            styles.rollValue,
-                            {
-                              backgroundColor: roll.modifiers[dieIndex] > 0 ? colors.success : colors.danger,
-                            }
-                          ]}
-                        >
-                          {roll.modifiers[dieIndex] > 0 ? '+' : ''}{roll.modifiers[dieIndex]}
-                        </Text>
-                      )}
+                      {roll.results[dieIndex].map((rollValue, rollIndex) => {
+                        const modifier = roll.modifiers ? roll.modifiers[dieIndex] : 0;
+                        const hasModifier = settings.modifiersEnabled && modifier !== 0;
+                        const modifiedTotal = rollValue + modifier;
+                        
+                        if (hasModifier) {
+                          return (
+                            <Text 
+                              key={rollIndex}
+                              style={[
+                                styles.rollValue,
+                                {
+                                  backgroundColor: modifier > 0 ? colors.success : colors.danger,
+                                }
+                              ]}
+                            >
+                              {modifiedTotal}({rollValue}{modifier > 0 ? '+' : ''}{modifier})
+                            </Text>
+                          );
+                        } else {
+                          return (
+                            <Text key={rollIndex} style={styles.rollValue}>
+                              {rollValue}
+                            </Text>
+                          );
+                        }
+                      })}
                     </View>
                   </View>
                 ))}

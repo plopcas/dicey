@@ -16,6 +16,7 @@ export const rollSingleDie = (sides: number): number => {
 
 export const rollDice = (configuration: DiceConfiguration): RollResult => {
   const results: number[][] = [];
+  const modifiers: number[] = [];
   let total = 0;
 
   configuration.dice.forEach((die) => {
@@ -26,6 +27,11 @@ export const rollDice = (configuration: DiceConfiguration): RollResult => {
       total += roll;
     }
     results.push(dieResults);
+    
+    // Track modifier for this die group
+    const modifier = die.modifier || 0;
+    modifiers.push(modifier);
+    total += modifier;
   });
 
   return {
@@ -34,6 +40,7 @@ export const rollDice = (configuration: DiceConfiguration): RollResult => {
     configurationName: configuration.name,
     dice: configuration.dice,
     results,
+    modifiers,
     total,
     timestamp: new Date(),
   };
@@ -41,7 +48,13 @@ export const rollDice = (configuration: DiceConfiguration): RollResult => {
 
 export const formatDiceConfiguration = (dice: Die[]): string => {
   return dice
-    .map((die) => `${die.quantity}D${die.sides}`)
+    .map((die) => {
+      let str = `${die.quantity}D${die.sides}`;
+      if (die.modifier) {
+        str += die.modifier > 0 ? `+${die.modifier}` : `${die.modifier}`;
+      }
+      return str;
+    })
     .join(' + ');
 };
 
