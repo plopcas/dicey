@@ -154,6 +154,17 @@ ios/Pods/
 dist/
 web-build/
 
+# EAS Build
+.eas/
+*.keystore
+*.jks
+service-account-key.json
+
+# Build outputs
+*.apk
+*.aab
+*.ipa
+
 # Debugging
 npm-debug.*
 yarn-debug.*

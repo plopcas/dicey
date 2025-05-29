@@ -170,6 +170,31 @@ cd web && npm start
 cd mobile && npm start
 ```
 
+## 📱 Building for Android
+
+### Quick Build (Recommended)
+```bash
+cd mobile
+eas login              # Login to Expo account
+eas build --platform android --profile preview    # Build APK for testing
+eas build --platform android --profile production # Build AAB for Play Store
+```
+
+### Detailed Instructions
+See [BUILD_GUIDE.md](BUILD_GUIDE.md) for complete build instructions, Play Store submission guide, and troubleshooting.
+
+### Build Profiles
+- **Preview**: APK for device testing
+- **Production**: AAB for Play Store submission  
+- **Production-APK**: APK for direct distribution
+
+### Play Store Ready
+The app is configured for Play Store submission with:
+- ✅ Proper package name and versioning
+- ✅ Privacy policy and content ratings
+- ✅ Store listing assets and descriptions
+- ✅ Android app bundle (AAB) support
+
 ## 🤝 Contributing
 
 This is a learning project, but contributions are welcome! Please follow these steps:

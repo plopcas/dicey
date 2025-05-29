@@ -25,7 +25,8 @@
       "adaptiveIcon": {
         "backgroundColor": "#667eea"
       },
-      "playStoreUrl": "https://play.google.com/store/apps/details?id=com.dicey.mobile"
+      "playStoreUrl": "https://play.google.com/store/apps/details?id=com.dicey.mobile",
+      "buildType": "apk"
     },
     "extra": {
       "eas": {

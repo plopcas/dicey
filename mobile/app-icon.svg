@@ -1,0 +1,23 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="230" fill="#667eea"/>
+  
+  <!-- Dice -->
+  <rect x="200" y="200" width="250" height="250" rx="40" fill="white" stroke="#334155" stroke-width="8"/>
+  <rect x="574" y="374" width="250" height="250" rx="40" fill="white" stroke="#334155" stroke-width="8"/>
+  
+  <!-- Dots on first die (showing 6) -->
+  <circle cx="240" cy="240" r="25" fill="#334155"/>
+  <circle cx="240" cy="320" r="25" fill="#334155"/>
+  <circle cx="240" cy="400" r="25" fill="#334155"/>
+  <circle cx="410" cy="240" r="25" fill="#334155"/>
+  <circle cx="410" cy="320" r="25" fill="#334155"/>
+  <circle cx="410" cy="400" r="25" fill="#334155"/>
+  
+  <!-- Dots on second die (showing 1) -->
+  <circle cx="699" cy="499" r="30" fill="#334155"/>
+  
+  <!-- Plus symbol -->
+  <rect x="485" y="295" width="54" height="8" rx="4" fill="white"/>
+  <rect x="508" y="272" width="8" height="54" rx="4" fill="white"/>
+</svg>
