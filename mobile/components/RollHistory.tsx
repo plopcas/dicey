@@ -1,0 +1,112 @@
+import React from 'react';
+import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
+import { RollResult } from '../shared/types';
+import { formatDiceConfiguration } from '../shared/utils';
+import { styles, colors } from '../styles/styles';
+
+interface RollHistoryProps {
+  history: RollResult[];
+  onClear: () => void;
+}
+
+export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) => {
+  const handleClear = () => {
+    Alert.alert(
+      'Clear History',
+      'Are you sure you want to clear all roll history? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Clear All', style: 'destructive', onPress: onClear },
+      ]
+    );
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  if (history.length === 0) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateIcon}>📜</Text>
+          <Text style={styles.emptyStateTitle}>No Roll History</Text>
+          <Text style={styles.emptyStateText}>
+            Start rolling dice to see your roll history here. All rolls are automatically saved.
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+      <View style={styles.section}>
+        <View style={[styles.row, styles.spaceBetween, { marginBottom: 16 }]}>
+          <Text style={styles.sectionTitle}>
+            Roll History ({history.length})
+          </Text>
+          
+          <Pressable
+            style={({ pressed }) => [
+              styles.button,
+              styles.smallButton,
+              styles.dangerButton,
+              pressed && styles.dangerButtonPressed,
+            ]}
+            onPress={handleClear}
+          >
+            <Text style={styles.smallButtonText}>Clear All</Text>
+          </Pressable>
+        </View>
+        
+        <View style={styles.list}>
+          {history.map((roll) => (
+            <View key={roll.id} style={styles.listItem}>
+              <View style={styles.listItemHeader}>
+                <Text style={styles.listItemTitle} numberOfLines={1}>
+                  {roll.configurationName}
+                </Text>
+                <View style={[styles.totalContainer, { minWidth: 'auto', paddingHorizontal: 12, paddingVertical: 4 }]}>
+                  <Text style={[styles.totalValue, { fontSize: 20 }]}>
+                    {roll.total}
+                  </Text>
+                </View>
+              </View>
+              
+              <Text style={styles.listItemSubtitle}>
+                {formatDiceConfiguration(roll.dice)}
+              </Text>
+              
+              <View style={{ marginVertical: 8 }}>
+                {roll.dice.map((die, dieIndex) => (
+                  <View key={dieIndex} style={{ marginBottom: 4 }}>
+                    <Text style={[styles.listItemMeta, { marginBottom: 4 }]}>
+                      {die.quantity}D{die.sides}:
+                    </Text>
+                    <View style={styles.individualRolls}>
+                      {roll.results[dieIndex].map((rollValue, rollIndex) => (
+                        <Text key={rollIndex} style={styles.rollValue}>
+                          {rollValue}
+                        </Text>
+                      ))}
+                    </View>
+                  </View>
+                ))}
+              </View>
+              
+              <Text style={styles.listItemMeta}>
+                {formatTime(roll.timestamp)}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </View>
+    </ScrollView>
+  );
+};

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, Pressable } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { Die, DICE_TYPES } from '../shared/types';
 import { formatDiceConfiguration, validateDiceConfiguration } from '../shared/utils';
-import { styles } from '../styles/styles';
+import { styles, colors } from '../styles/styles';
 
 interface DiceBuilderProps {
   onSave: (name: string, dice: Die[]) => void;
@@ -13,6 +13,7 @@ interface DiceBuilderProps {
 export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll }) => {
   const [dice, setDice] = useState<Die[]>([]);
   const [configName, setConfigName] = useState('');
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
   const addDie = () => {
     setDice([...dice, { sides: 6, quantity: 1 }]);
@@ -30,24 +31,24 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll }) => {
 
   const handleSave = () => {
     if (!configName.trim()) {
-      Alert.alert('Error', 'Please enter a configuration name');
+      Alert.alert('Missing Name', 'Please enter a configuration name');
       return;
     }
     
     if (!validateDiceConfiguration(dice)) {
-      Alert.alert('Error', 'Please add at least one die');
+      Alert.alert('Invalid Configuration', 'Please add at least one die');
       return;
     }
 
     onSave(configName.trim(), dice);
     setConfigName('');
     setDice([]);
-    Alert.alert('Success', 'Configuration saved!');
+    Alert.alert('Success', 'Configuration saved successfully!');
   };
 
   const handleRoll = () => {
     if (!validateDiceConfiguration(dice)) {
-      Alert.alert('Error', 'Please add at least one die');
+      Alert.alert('Invalid Configuration', 'Please add at least one die to roll');
       return;
     }
     onRoll(dice);
@@ -56,87 +57,151 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll }) => {
   const isValid = validateDiceConfiguration(dice);
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Dice Configuration</Text>
-      
-      <View style={styles.diceList}>
-        {dice.map((die, index) => (
-          <View key={index} style={styles.dieConfig}>
-            <View style={styles.dieInputs}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Quantity:</Text>
-                <TextInput
-                  style={styles.numberInput}
-                  value={die.quantity.toString()}
-                  onChangeText={(text) => updateDie(index, { quantity: parseInt(text) || 1 })}
-                  keyboardType="numeric"
-                  maxLength={2}
-                />
-              </View>
-              
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Sides:</Text>
-                <Picker
-                  style={styles.picker}
-                  selectedValue={die.sides}
-                  onValueChange={(value) => updateDie(index, { sides: value })}
-                >
-                  {DICE_TYPES.map(sides => (
-                    <Picker.Item key={sides} label={`D${sides}`} value={sides} />
-                  ))}
-                </Picker>
-              </View>
-            </View>
-            
-            <TouchableOpacity
-              style={styles.removeButton}
-              onPress={() => removeDie(index)}
-            >
-              <Text style={styles.removeButtonText}>Remove</Text>
-            </TouchableOpacity>
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Dice Configuration</Text>
+        
+        {dice.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateIcon}>🎲</Text>
+            <Text style={styles.emptyStateTitle}>No Dice Added</Text>
+            <Text style={styles.emptyStateText}>
+              Tap the "Add Die" button below to start building your dice configuration.
+            </Text>
           </View>
-        ))}
+        ) : (
+          <View style={styles.diceList}>
+            {dice.map((die, index) => (
+              <View key={index} style={styles.dieConfig}>
+                <View style={styles.dieInputs}>
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>Quantity</Text>
+                    <TextInput
+                      style={[
+                        styles.numberInput,
+                        focusedInput === `quantity-${index}` && styles.numberInputFocused
+                      ]}
+                      value={die.quantity.toString()}
+                      onChangeText={(text) => {
+                        const num = parseInt(text) || 1;
+                        updateDie(index, { quantity: Math.max(1, Math.min(20, num)) });
+                      }}
+                      onFocus={() => setFocusedInput(`quantity-${index}`)}
+                      onBlur={() => setFocusedInput(null)}
+                      keyboardType="numeric"
+                      maxLength={2}
+                      selectTextOnFocus
+                    />
+                  </View>
+                  
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>Die Type</Text>
+                    <View style={styles.picker}>
+                      <Picker
+                        selectedValue={die.sides}
+                        onValueChange={(value) => updateDie(index, { sides: value })}
+                        style={{ height: 48 }}
+                      >
+                        {DICE_TYPES.map(sides => (
+                          <Picker.Item 
+                            key={sides} 
+                            label={`D${sides}`} 
+                            value={sides}
+                            style={{ fontSize: 16 }}
+                          />
+                        ))}
+                      </Picker>
+                    </View>
+                  </View>
+                </View>
+                
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.button,
+                    styles.smallButton,
+                    styles.dangerButton,
+                    pressed && styles.dangerButtonPressed,
+                  ]}
+                  onPress={() => removeDie(index)}
+                >
+                  <Text style={styles.smallButtonText}>Remove</Text>
+                </Pressable>
+              </View>
+            ))}
+          </View>
+        )}
+
+        <Pressable
+          style={({ pressed }) => [
+            styles.button,
+            styles.successButton,
+            pressed && styles.successButtonPressed,
+          ]}
+          onPress={addDie}
+        >
+          <Text style={styles.buttonText}>➕ Add Die</Text>
+        </Pressable>
+
+        {dice.length > 0 && (
+          <View style={styles.preview}>
+            <Text style={styles.previewText}>
+              {formatDiceConfiguration(dice)}
+            </Text>
+          </View>
+        )}
       </View>
 
-      <TouchableOpacity style={styles.addDieButton} onPress={addDie}>
-        <Text style={styles.addDieButtonText}>Add Die</Text>
-      </TouchableOpacity>
-
-      {dice.length > 0 && (
-        <View style={styles.configPreview}>
-          <Text style={styles.configPreviewText}>
-            Configuration: {formatDiceConfiguration(dice)}
-          </Text>
-        </View>
-      )}
-
-      <View style={styles.actions}>
-        <TouchableOpacity
-          style={[styles.rollButton, !isValid && styles.disabledButton]}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Actions</Text>
+        
+        <Pressable
+          style={({ pressed }) => [
+            styles.button,
+            styles.primaryButton,
+            !isValid && styles.disabledButton,
+            pressed && isValid && styles.primaryButtonPressed,
+          ]}
           onPress={handleRoll}
           disabled={!isValid}
         >
-          <Text style={styles.rollButtonText}>Roll Dice</Text>
-        </TouchableOpacity>
+          <Text style={styles.buttonText}>
+            {isValid ? '🎲 Roll Dice' : 'Add dice to roll'}
+          </Text>
+        </Pressable>
 
-        <View style={styles.saveSection}>
+        <View style={styles.section}>
+          <Text style={styles.inputLabel}>Save Configuration</Text>
           <TextInput
-            style={styles.textInput}
-            placeholder="Configuration name..."
+            style={[
+              styles.textInput,
+              focusedInput === 'configName' && styles.textInputFocused
+            ]}
+            placeholder="Enter configuration name..."
+            placeholderTextColor={colors.textLight}
             value={configName}
             onChangeText={setConfigName}
-            placeholderTextColor="#999"
+            onFocus={() => setFocusedInput('configName')}
+            onBlur={() => setFocusedInput(null)}
+            returnKeyType="done"
+            onSubmitEditing={handleSave}
           />
-          <TouchableOpacity
-            style={[
-              styles.saveButton,
-              (!isValid || !configName.trim()) && styles.disabledButton
-            ]}
-            onPress={handleSave}
-            disabled={!isValid || !configName.trim()}
-          >
-            <Text style={styles.saveButtonText}>Save</Text>
-          </TouchableOpacity>
+          
+          <View style={styles.mt}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.button,
+                styles.successButton,
+                (!isValid || !configName.trim()) && styles.disabledButton,
+                pressed && isValid && configName.trim() && styles.successButtonPressed,
+              ]}
+              onPress={handleSave}
+              disabled={!isValid || !configName.trim()}
+            >
+              <Text style={styles.buttonText}>
+                💾 Save Configuration
+              </Text>
+            </Pressable>
+          </View>
         </View>
       </View>
     </ScrollView>

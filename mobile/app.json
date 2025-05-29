@@ -1,20 +1,36 @@
 {
   "expo": {
-    "name": "Dicey",
+    "name": "Dicey - Dice Roller",
     "slug": "dicey-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "description": "A modern dice rolling app for tabletop gaming with custom configurations and roll history.",
+    "privacy": "public",
+    "platforms": ["android"],
     "splash": {
       "resizeMode": "contain",
       "backgroundColor": "#667eea"
     },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.dicey.mobile"
+    "updates": {
+      "fallbackToCacheTimeout": 0
     },
+    "assetBundlePatterns": ["**/*"],
     "android": {
-      "package": "com.dicey.mobile"
+      "package": "com.dicey.mobile",
+      "versionCode": 1,
+      "compileSdkVersion": 34,
+      "targetSdkVersion": 34,
+      "permissions": [],
+      "adaptiveIcon": {
+        "backgroundColor": "#667eea"
+      },
+      "playStoreUrl": "https://play.google.com/store/apps/details?id=com.dicey.mobile"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "dicey-mobile-app"
+      }
     }
   }
 }

@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
+import { View, Text, Pressable, SafeAreaView, StatusBar } from 'react-native';
 import { DiceConfiguration, RollResult, Die } from './shared/types';
 import { mobileDiceService } from './services/diceService';
 import { DiceBuilder } from './components/DiceBuilder';
-import { styles } from './styles/styles';
+import { SavedConfigurations } from './components/SavedConfigurations';
+import { RollHistory } from './components/RollHistory';
+import { RollResultModal } from './components/RollResultModal';
+import { styles, colors } from './styles/styles';
 
 type Tab = 'builder' | 'saved' | 'history';
 
@@ -12,142 +15,166 @@ const App: React.FC = () => {
   const [configurations, setConfigurations] = useState<DiceConfiguration[]>([]);
   const [rollHistory, setRollHistory] = useState<RollResult[]>([]);
   const [lastRoll, setLastRoll] = useState<RollResult | null>(null);
+  const [showRollResult, setShowRollResult] = useState(false);
 
   useEffect(() => {
     loadData();
   }, []);
 
   const loadData = async () => {
-    const configs = await mobileDiceService.getConfigurations();
-    const history = await mobileDiceService.getRollHistory();
-    setConfigurations(configs);
-    setRollHistory(history);
+    try {
+      const configs = await mobileDiceService.getConfigurations();
+      const history = await mobileDiceService.getRollHistory();
+      setConfigurations(configs);
+      setRollHistory(history);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    }
   };
 
   const handleSaveConfiguration = async (name: string, dice: Die[]) => {
-    await mobileDiceService.saveConfiguration({ name, dice });
-    loadData();
+    try {
+      await mobileDiceService.saveConfiguration({ name, dice });
+      await loadData();
+    } catch (error) {
+      console.error('Error saving configuration:', error);
+    }
   };
 
   const handleDeleteConfiguration = async (id: string) => {
-    await mobileDiceService.deleteConfiguration(id);
-    loadData();
+    try {
+      await mobileDiceService.deleteConfiguration(id);
+      await loadData();
+    } catch (error) {
+      console.error('Error deleting configuration:', error);
+    }
   };
 
   const handleRoll = async (dice: Die[] | DiceConfiguration) => {
-    let result: RollResult;
-    
-    if ('id' in dice) {
-      result = mobileDiceService.rollDice(dice);
-    } else {
-      const tempConfig: DiceConfiguration = {
-        id: 'temp',
-        name: 'Quick Roll',
-        dice,
-        createdAt: new Date(),
-      };
-      result = mobileDiceService.rollDice(tempConfig);
+    try {
+      let result: RollResult;
+      
+      if ('id' in dice) {
+        // Rolling a saved configuration
+        result = mobileDiceService.rollDice(dice);
+      } else {
+        // Rolling a temporary configuration
+        const tempConfig: DiceConfiguration = {
+          id: 'temp',
+          name: 'Quick Roll',
+          dice,
+          createdAt: new Date(),
+        };
+        result = mobileDiceService.rollDice(tempConfig);
+      }
+      
+      setLastRoll(result);
+      setShowRollResult(true);
+      await loadData();
+    } catch (error) {
+      console.error('Error rolling dice:', error);
     }
-    
-    setLastRoll(result);
-    loadData();
   };
 
   const handleClearHistory = async () => {
-    await mobileDiceService.clearHistory();
-    setRollHistory([]);
+    try {
+      await mobileDiceService.clearHistory();
+      setRollHistory([]);
+    } catch (error) {
+      console.error('Error clearing history:', error);
+    }
   };
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'builder':
-        return <DiceBuilder onSave={handleSaveConfiguration} onRoll={handleRoll} />;
+        return (
+          <DiceBuilder 
+            onSave={handleSaveConfiguration} 
+            onRoll={handleRoll} 
+          />
+        );
       case 'saved':
-        return <SavedConfigurationsScreen configurations={configurations} onRoll={handleRoll} onDelete={handleDeleteConfiguration} />;
+        return (
+          <SavedConfigurations
+            configurations={configurations}
+            onRoll={handleRoll}
+            onDelete={handleDeleteConfiguration}
+          />
+        );
       case 'history':
-        return <RollHistoryScreen history={rollHistory} onClear={handleClearHistory} />;
+        return (
+          <RollHistory
+            history={rollHistory}
+            onClear={handleClearHistory}
+          />
+        );
       default:
         return null;
     }
   };
 
+  const getTabLabel = (tab: Tab) => {
+    switch (tab) {
+      case 'builder':
+        return 'Builder';
+      case 'saved':
+        return `Saved (${configurations.length})`;
+      case 'history':
+        return `History (${rollHistory.length})`;
+      default:
+        return '';
+    }
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#667eea' }}>
-      <StatusBar barStyle="light-content" backgroundColor="#667eea" />
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.primary }}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
       
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>🎲 Dicey</Text>
-        <Text style={styles.headerSubtitle}>Your digital dice rolling companion</Text>
+        <Text style={styles.headerSubtitle}>
+          Your digital dice rolling companion
+        </Text>
       </View>
 
+      {/* Tab Navigation */}
       <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'builder' && styles.activeTab]}
-          onPress={() => setActiveTab('builder')}
-        >
-          <Text style={[styles.tabText, activeTab === 'builder' && styles.activeTabText]}>
-            Builder
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'saved' && styles.activeTab]}
-          onPress={() => setActiveTab('saved')}
-        >
-          <Text style={[styles.tabText, activeTab === 'saved' && styles.activeTabText]}>
-            Saved ({configurations.length})
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'history' && styles.activeTab]}
-          onPress={() => setActiveTab('history')}
-        >
-          <Text style={[styles.tabText, activeTab === 'history' && styles.activeTabText]}>
-            History ({rollHistory.length})
-          </Text>
-        </TouchableOpacity>
+        {(['builder', 'saved', 'history'] as Tab[]).map((tab) => (
+          <Pressable
+            key={tab}
+            style={[
+              styles.tab,
+              activeTab === tab && styles.activeTab,
+            ]}
+            onPress={() => setActiveTab(tab)}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === tab && styles.activeTabText,
+              ]}
+            >
+              {getTabLabel(tab)}
+            </Text>
+          </Pressable>
+        ))}
       </View>
 
-      <View style={styles.content}>
+      {/* Content */}
+      <View style={{ flex: 1 }}>
         {renderTabContent()}
       </View>
 
-      {lastRoll && (
-        <RollResultOverlay result={lastRoll} onClose={() => setLastRoll(null)} />
-      )}
+      {/* Roll Result Modal */}
+      <RollResultModal
+        result={lastRoll}
+        visible={showRollResult}
+        onClose={() => setShowRollResult(false)}
+      />
     </SafeAreaView>
   );
 };
-
-// Placeholder components - these would be implemented similarly to the web versions
-const SavedConfigurationsScreen: React.FC<any> = () => (
-  <View style={styles.emptyState}>
-    <Text style={styles.emptyStateIcon}>📋</Text>
-    <Text style={styles.emptyStateText}>Saved configurations will appear here</Text>
-  </View>
-);
-
-const RollHistoryScreen: React.FC<any> = () => (
-  <View style={styles.emptyState}>
-    <Text style={styles.emptyStateIcon}>📜</Text>
-    <Text style={styles.emptyStateText}>Roll history will appear here</Text>
-  </View>
-);
-
-const RollResultOverlay: React.FC<any> = ({ result, onClose }) => (
-  <View style={styles.rollResult}>
-    <View style={styles.resultHeader}>
-      <Text style={styles.resultConfigName}>{result.configurationName}</Text>
-      <View style={styles.totalContainer}>
-        <Text style={styles.totalLabel}>Total</Text>
-        <Text style={styles.totalValue}>{result.total}</Text>
-      </View>
-    </View>
-    <TouchableOpacity onPress={onClose} style={styles.saveButton}>
-      <Text style={styles.saveButtonText}>Close</Text>
-    </TouchableOpacity>
-  </View>
-);
 
 export default App;

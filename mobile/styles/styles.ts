@@ -1,417 +1,466 @@
 import { StyleSheet, Dimensions } from 'react-native';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
+const isSmallScreen = width < 380;
+
+// Color palette
+const colors = {
+  primary: '#667eea',
+  primaryDark: '#5a6fd8',
+  secondary: '#764ba2',
+  success: '#10b981',
+  successDark: '#059669',
+  danger: '#ef4444',
+  dangerDark: '#dc2626',
+  warning: '#f59e0b',
+  background: '#f8fafc',
+  surface: '#ffffff',
+  surfaceSecondary: '#f1f5f9',
+  text: '#1e293b',
+  textSecondary: '#64748b',
+  textLight: '#94a3b8',
+  border: '#e2e8f0',
+  borderLight: '#f1f5f9',
+  shadow: 'rgba(0, 0, 0, 0.1)',
+};
+
+// Typography
+const typography = {
+  h1: {
+    fontSize: isSmallScreen ? 24 : 28,
+    fontWeight: '700' as const,
+    letterSpacing: -0.5,
+  },
+  h2: {
+    fontSize: isSmallScreen ? 20 : 24,
+    fontWeight: '600' as const,
+    letterSpacing: -0.3,
+  },
+  h3: {
+    fontSize: isSmallScreen ? 16 : 18,
+    fontWeight: '600' as const,
+  },
+  body: {
+    fontSize: isSmallScreen ? 14 : 16,
+    fontWeight: '400' as const,
+  },
+  caption: {
+    fontSize: isSmallScreen ? 12 : 14,
+    fontWeight: '400' as const,
+  },
+};
+
+// Spacing
+const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 48,
+};
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
   
   // Header
   header: {
-    backgroundColor: '#667eea',
+    backgroundColor: colors.primary,
     paddingTop: 60,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
+    paddingBottom: spacing.lg,
+    paddingHorizontal: spacing.lg,
     alignItems: 'center',
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
   },
   headerTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
+    ...typography.h1,
     color: 'white',
-    marginBottom: 8,
+    marginBottom: spacing.xs,
   },
   headerSubtitle: {
-    fontSize: 16,
+    ...typography.body,
     color: 'rgba(255,255,255,0.9)',
+    textAlign: 'center',
   },
 
   // Navigation
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    elevation: 2,
-    shadowColor: '#000',
+    borderBottomColor: colors.border,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    elevation: 4,
   },
   tab: {
     flex: 1,
-    paddingVertical: 16,
+    paddingVertical: spacing.md,
     alignItems: 'center',
     borderBottomWidth: 3,
     borderBottomColor: 'transparent',
   },
   activeTab: {
-    borderBottomColor: '#667eea',
+    borderBottomColor: colors.primary,
   },
   tabText: {
-    fontSize: 16,
-    color: '#666',
+    ...typography.caption,
+    color: colors.textSecondary,
+    textAlign: 'center',
   },
   activeTabText: {
-    color: '#667eea',
+    color: colors.primary,
     fontWeight: '600',
   },
 
   // Content
   content: {
     flex: 1,
-    padding: 20,
+    padding: spacing.lg,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
+  scrollContent: {
+    paddingBottom: spacing.xl,
+  },
+  
+  // Cards and sections
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  
+  section: {
+    marginBottom: spacing.lg,
+  },
+  
+  sectionTitle: {
+    ...typography.h2,
+    color: colors.text,
+    marginBottom: spacing.md,
   },
 
   // Dice Builder
   diceList: {
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   dieConfig: {
-    backgroundColor: 'white',
-    padding: 16,
+    backgroundColor: colors.surface,
     borderRadius: 12,
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
     shadowRadius: 4,
+    elevation: 2,
   },
   dieInputs: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: spacing.md,
+    gap: spacing.md,
   },
   inputGroup: {
     flex: 1,
-    marginHorizontal: 8,
   },
   inputLabel: {
-    fontSize: 14,
+    ...typography.caption,
+    color: colors.text,
     fontWeight: '600',
-    marginBottom: 8,
-    color: '#333',
+    marginBottom: spacing.xs,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   numberInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
+    borderWidth: 2,
+    borderColor: colors.border,
     borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
+    padding: spacing.md,
+    fontSize: typography.body.fontSize,
     textAlign: 'center',
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
+    fontWeight: '500',
+  },
+  numberInputFocused: {
+    borderColor: colors.primary,
   },
   picker: {
-    borderWidth: 1,
-    borderColor: '#ddd',
+    borderWidth: 2,
+    borderColor: colors.border,
     borderRadius: 8,
-    backgroundColor: 'white',
-  },
-  removeButton: {
-    backgroundColor: '#dc3545',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 6,
-    alignSelf: 'center',
-  },
-  removeButtonText: {
-    color: 'white',
-    fontWeight: '600',
+    backgroundColor: colors.surface,
+    height: 48,
   },
 
-  addDieButton: {
-    backgroundColor: '#28a745',
-    padding: 16,
+  // Buttons
+  button: {
     borderRadius: 12,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
     alignItems: 'center',
-    marginBottom: 20,
-  },
-  addDieButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-
-  configPreview: {
-    backgroundColor: '#e9ecef',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  configPreviewText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-
-  actions: {
-    gap: 16,
-  },
-  rollButton: {
-    backgroundColor: '#667eea',
-    padding: 20,
-    borderRadius: 12,
-    alignItems: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-  },
-  rollButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  disabledButton: {
-    backgroundColor: '#ccc',
-    elevation: 0,
-    shadowOpacity: 0,
-  },
-
-  saveSection: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  textInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 16,
-    fontSize: 16,
-    backgroundColor: 'white',
-  },
-  saveButton: {
-    backgroundColor: '#28a745',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 8,
     justifyContent: 'center',
-  },
-  saveButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-
-  // Saved Configurations
-  configurationsList: {
-    gap: 12,
-  },
-  configurationItem: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: '#667eea',
-    elevation: 2,
-    shadowColor: '#000',
+    flexDirection: 'row',
+    gap: spacing.xs,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    elevation: 3,
   },
-  configInfo: {
-    marginBottom: 12,
+  
+  primaryButton: {
+    backgroundColor: colors.primary,
   },
-  configName: {
-    fontSize: 18,
+  primaryButtonPressed: {
+    backgroundColor: colors.primaryDark,
+  },
+  
+  successButton: {
+    backgroundColor: colors.success,
+  },
+  successButtonPressed: {
+    backgroundColor: colors.successDark,
+  },
+  
+  dangerButton: {
+    backgroundColor: colors.danger,
+  },
+  dangerButtonPressed: {
+    backgroundColor: colors.dangerDark,
+  },
+  
+  disabledButton: {
+    backgroundColor: colors.textLight,
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  
+  buttonText: {
+    ...typography.body,
+    fontWeight: '600',
+    color: 'white',
+  },
+  
+  smallButton: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: 8,
+  },
+  
+  smallButtonText: {
+    ...typography.caption,
+    fontWeight: '600',
+    color: 'white',
+  },
+
+  // Floating Action Button
+  fab: {
+    position: 'absolute',
+    bottom: spacing.lg,
+    right: spacing.lg,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  
+  fabText: {
+    color: 'white',
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 4,
-    color: '#333',
   },
-  configFormula: {
-    fontSize: 14,
+
+  // Text inputs
+  textInput: {
+    borderWidth: 2,
+    borderColor: colors.border,
+    borderRadius: 8,
+    padding: spacing.md,
+    fontSize: typography.body.fontSize,
+    backgroundColor: colors.surface,
+    color: colors.text,
+  },
+  textInputFocused: {
+    borderColor: colors.primary,
+  },
+
+  // Preview and results
+  preview: {
+    backgroundColor: colors.surfaceSecondary,
+    borderRadius: 12,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+  },
+  previewText: {
+    ...typography.body,
+    fontWeight: '600',
+    color: colors.text,
     fontFamily: 'monospace',
-    color: '#666',
-    marginBottom: 4,
-  },
-  configDate: {
-    fontSize: 12,
-    color: '#999',
-  },
-  configActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  configRollButton: {
-    backgroundColor: '#667eea',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 6,
-    flex: 1,
-    alignItems: 'center',
-  },
-  configRollButtonText: {
-    color: 'white',
-    fontWeight: '600',
-  },
-  configDeleteButton: {
-    backgroundColor: '#dc3545',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 6,
-    alignItems: 'center',
-  },
-  configDeleteButtonText: {
-    color: 'white',
-    fontWeight: '600',
   },
 
   // Roll Result
   rollResult: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 12,
-    margin: 20,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    margin: spacing.lg,
+    padding: spacing.lg,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 8,
   },
   resultHeader: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.lg,
+    paddingBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderLight,
   },
   resultConfigName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#333',
+    ...typography.h3,
+    color: colors.text,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
   },
   totalContainer: {
     alignItems: 'center',
+    backgroundColor: colors.surfaceSecondary,
+    borderRadius: 12,
+    padding: spacing.md,
+    minWidth: 120,
   },
   totalLabel: {
-    fontSize: 16,
+    ...typography.caption,
+    color: colors.textSecondary,
     fontWeight: '600',
-    color: '#333',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: spacing.xs,
   },
   totalValue: {
-    fontSize: 48,
+    fontSize: isSmallScreen ? 36 : 48,
     fontWeight: 'bold',
-    color: '#667eea',
+    color: colors.primary,
   },
 
+  // Dice results
   diceResults: {
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   dieResult: {
-    backgroundColor: '#f8f9fa',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 12,
+    backgroundColor: colors.surfaceSecondary,
+    borderRadius: 12,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
   },
   dieTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#333',
+    ...typography.body,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: spacing.sm,
   },
   individualRolls: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 8,
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
   },
   rollValue: {
-    backgroundColor: '#667eea',
+    backgroundColor: colors.primary,
     color: 'white',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 4,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    borderRadius: 6,
     fontWeight: 'bold',
+    fontSize: typography.caption.fontSize,
     minWidth: 32,
     textAlign: 'center',
+    overflow: 'hidden',
   },
   dieTotal: {
-    fontSize: 14,
+    ...typography.caption,
     fontWeight: '600',
-    color: '#666',
+    color: colors.textSecondary,
   },
 
-  rollTimestamp: {
-    textAlign: 'center',
-    fontSize: 12,
-    color: '#999',
+  // Lists
+  list: {
+    gap: spacing.md,
   },
-
-  // Roll History
-  historyHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  clearButton: {
-    backgroundColor: '#dc3545',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 6,
-  },
-  clearButtonText: {
-    color: 'white',
-    fontWeight: '600',
-  },
-
-  historyList: {
-    gap: 12,
-  },
-  historyItem: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: '#667eea',
-    elevation: 1,
-    shadowColor: '#000',
+  listItem: {
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    padding: spacing.md,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  rollHeader: {
+  listItemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
+    alignItems: 'flex-start',
+    marginBottom: spacing.xs,
   },
-  rollConfigName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+  listItemTitle: {
+    ...typography.body,
+    fontWeight: '600',
+    color: colors.text,
+    flex: 1,
+    marginRight: spacing.sm,
   },
-  rollTotal: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#667eea',
-  },
-  rollFormula: {
-    fontSize: 14,
+  listItemSubtitle: {
+    ...typography.caption,
+    color: colors.textSecondary,
     fontFamily: 'monospace',
-    color: '#666',
-    marginBottom: 8,
+    marginBottom: spacing.xs,
   },
-  rollDetails: {
-    marginBottom: 8,
+  listItemMeta: {
+    ...typography.caption,
+    color: colors.textLight,
   },
-  dieDetail: {
-    fontSize: 12,
-    color: '#555',
-    marginBottom: 2,
+
+  // Actions
+  actionRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.md,
   },
-  rollTime: {
-    fontSize: 11,
-    color: '#999',
+  actionRowSpread: {
+    justifyContent: 'space-between',
   },
 
   // Empty states
@@ -419,16 +468,85 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 40,
-  },
-  emptyStateText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginTop: 16,
+    padding: spacing.xxl,
   },
   emptyStateIcon: {
-    fontSize: 48,
-    marginBottom: 16,
+    fontSize: isSmallScreen ? 48 : 64,
+    marginBottom: spacing.lg,
+  },
+  emptyStateTitle: {
+    ...typography.h3,
+    color: colors.text,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  emptyStateText: {
+    ...typography.body,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+
+  // Utility classes
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  spaceBetween: {
+    justifyContent: 'space-between',
+  },
+  center: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  textCenter: {
+    textAlign: 'center',
+  },
+  flex1: {
+    flex: 1,
+  },
+  
+  // Spacing utilities
+  mt: { marginTop: spacing.md },
+  mb: { marginBottom: spacing.md },
+  ml: { marginLeft: spacing.md },
+  mr: { marginRight: spacing.md },
+  mx: { marginHorizontal: spacing.md },
+  my: { marginVertical: spacing.md },
+  
+  pt: { paddingTop: spacing.md },
+  pb: { paddingBottom: spacing.md },
+  pl: { paddingLeft: spacing.md },
+  pr: { paddingRight: spacing.md },
+  px: { paddingHorizontal: spacing.md },
+  py: { paddingVertical: spacing.md },
+
+  // Modal overlay
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.lg,
+  },
+  
+  modal: {
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    padding: spacing.lg,
+    maxWidth: width - spacing.xl,
+    maxHeight: height * 0.8,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 16,
   },
 });
+
+// Export colors and typography for use in components
+export { colors, typography, spacing };
