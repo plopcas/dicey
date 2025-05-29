@@ -469,6 +469,9 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: spacing.xxl,
+    backgroundColor: colors.surface,
+    margin: spacing.lg,
+    borderRadius: 16,
   },
   emptyStateIcon: {
     fontSize: isSmallScreen ? 48 : 64,
@@ -482,9 +485,10 @@ export const styles = StyleSheet.create({
   },
   emptyStateText: {
     ...typography.body,
-    color: colors.textSecondary,
+    color: colors.text,
     textAlign: 'center',
     lineHeight: 24,
+    opacity: 0.8,
   },
 
   // Utility classes

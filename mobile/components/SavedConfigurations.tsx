@@ -29,7 +29,7 @@ export const SavedConfigurations: React.FC<SavedConfigurationsProps> = ({
   if (configurations.length === 0) {
     return (
       <View style={styles.container}>
-        <View style={styles.emptyState}>
+        <View style={[styles.emptyState, { marginHorizontal: 0 }]}>
           <Text style={styles.emptyStateIcon}>📋</Text>
           <Text style={styles.emptyStateTitle}>No Saved Configurations</Text>
           <Text style={styles.emptyStateText}>
@@ -42,7 +42,7 @@ export const SavedConfigurations: React.FC<SavedConfigurationsProps> = ({
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      <View style={styles.section}>
+      <View style={styles.content}>
         <Text style={styles.sectionTitle}>
           Saved Configurations ({configurations.length})
         </Text>
@@ -92,7 +92,7 @@ export const SavedConfigurations: React.FC<SavedConfigurationsProps> = ({
                   ]}
                   onPress={() => handleDelete(config)}
                 >
-                  <Text style={styles.buttonText}>🗑️</Text>
+                  <Text style={[styles.buttonText, { fontSize: 16 }]}>×</Text>
                 </Pressable>
               </View>
             </View>

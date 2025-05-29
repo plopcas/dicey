@@ -33,7 +33,7 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
   if (history.length === 0) {
     return (
       <View style={styles.container}>
-        <View style={styles.emptyState}>
+        <View style={[styles.emptyState, { marginHorizontal: 0 }]}>
           <Text style={styles.emptyStateIcon}>📜</Text>
           <Text style={styles.emptyStateTitle}>No Roll History</Text>
           <Text style={styles.emptyStateText}>
@@ -46,7 +46,7 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      <View style={styles.section}>
+      <View style={styles.content}>
         <View style={[styles.row, styles.spaceBetween, { marginBottom: 16 }]}>
           <Text style={styles.sectionTitle}>
             Roll History ({history.length})

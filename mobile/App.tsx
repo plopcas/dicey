@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, SafeAreaView, StatusBar } from 'react-native';
+import { View, Text, Pressable, SafeAreaView, StatusBar, ActivityIndicator } from 'react-native';
 import { DiceConfiguration, RollResult, Die } from './shared/types';
 import { mobileDiceService } from './services/diceService';
 import { DiceBuilder } from './components/DiceBuilder';
 import { SavedConfigurations } from './components/SavedConfigurations';
 import { RollHistory } from './components/RollHistory';
-import { RollResultModal } from './components/RollResultModal';
 import { styles, colors } from './styles/styles';
 
 type Tab = 'builder' | 'saved' | 'history';
@@ -15,7 +14,8 @@ const App: React.FC = () => {
   const [configurations, setConfigurations] = useState<DiceConfiguration[]>([]);
   const [rollHistory, setRollHistory] = useState<RollResult[]>([]);
   const [lastRoll, setLastRoll] = useState<RollResult | null>(null);
-  const [showRollResult, setShowRollResult] = useState(false);
+  const [loadedConfiguration, setLoadedConfiguration] = useState<Die[] | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadData();
@@ -23,19 +23,33 @@ const App: React.FC = () => {
 
   const loadData = async () => {
     try {
-      const configs = await mobileDiceService.getConfigurations();
-      const history = await mobileDiceService.getRollHistory();
+      setLoading(true);
+      console.log('Loading data...');
+      
+      const [configs, history] = await Promise.all([
+        mobileDiceService.getConfigurations(),
+        mobileDiceService.getRollHistory()
+      ]);
+      
+      console.log('Loaded configs:', configs.length);
+      console.log('Loaded history:', history.length);
+      
       setConfigurations(configs);
       setRollHistory(history);
     } catch (error) {
       console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSaveConfiguration = async (name: string, dice: Die[]) => {
     try {
+      console.log('Saving configuration:', name, dice);
       await mobileDiceService.saveConfiguration({ name, dice });
-      await loadData();
+      // Update configurations in real-time without full reload
+      const newConfigs = await mobileDiceService.getConfigurations();
+      setConfigurations(newConfigs);
     } catch (error) {
       console.error('Error saving configuration:', error);
     }
@@ -43,8 +57,11 @@ const App: React.FC = () => {
 
   const handleDeleteConfiguration = async (id: string) => {
     try {
+      console.log('Deleting configuration:', id);
       await mobileDiceService.deleteConfiguration(id);
-      await loadData();
+      // Update configurations in real-time without full reload
+      const newConfigs = await mobileDiceService.getConfigurations();
+      setConfigurations(newConfigs);
     } catch (error) {
       console.error('Error deleting configuration:', error);
     }
@@ -52,11 +69,14 @@ const App: React.FC = () => {
 
   const handleRoll = async (dice: Die[] | DiceConfiguration) => {
     try {
+      console.log('Rolling dice:', dice);
       let result: RollResult;
       
       if ('id' in dice) {
-        // Rolling a saved configuration
+        // Rolling a saved configuration - navigate to builder tab to show result
         result = mobileDiceService.rollDice(dice);
+        setLoadedConfiguration(dice.dice); // Load the dice configuration
+        setActiveTab('builder');
       } else {
         // Rolling a temporary configuration
         const tempConfig: DiceConfiguration = {
@@ -66,11 +86,15 @@ const App: React.FC = () => {
           createdAt: new Date(),
         };
         result = mobileDiceService.rollDice(tempConfig);
+        setLoadedConfiguration(null); // Clear any loaded config when rolling from builder
       }
       
+      console.log('Roll result:', result);
       setLastRoll(result);
-      setShowRollResult(true);
-      await loadData();
+      
+      // Update roll history immediately to refresh tab count
+      const updatedHistory = await mobileDiceService.getRollHistory();
+      setRollHistory(updatedHistory);
     } catch (error) {
       console.error('Error rolling dice:', error);
     }
@@ -78,6 +102,7 @@ const App: React.FC = () => {
 
   const handleClearHistory = async () => {
     try {
+      console.log('Clearing history');
       await mobileDiceService.clearHistory();
       setRollHistory([]);
     } catch (error) {
@@ -86,12 +111,23 @@ const App: React.FC = () => {
   };
 
   const renderTabContent = () => {
+    if (loading) {
+      return (
+        <View style={[styles.container, styles.center]}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.emptyStateText, { marginTop: 16 }]}>Loading...</Text>
+        </View>
+      );
+    }
+
     switch (activeTab) {
       case 'builder':
         return (
           <DiceBuilder 
             onSave={handleSaveConfiguration} 
-            onRoll={handleRoll} 
+            onRoll={handleRoll}
+            lastRoll={lastRoll}
+            loadedConfiguration={loadedConfiguration}
           />
         );
       case 'saved':
@@ -148,7 +184,18 @@ const App: React.FC = () => {
               styles.tab,
               activeTab === tab && styles.activeTab,
             ]}
-            onPress={() => setActiveTab(tab)}
+            onPress={async () => {
+              setActiveTab(tab);
+              // Only refresh data when switching to saved or history tabs
+              if (tab === 'saved' || tab === 'history') {
+                const [newConfigs, newHistory] = await Promise.all([
+                  mobileDiceService.getConfigurations(),
+                  mobileDiceService.getRollHistory()
+                ]);
+                setConfigurations(newConfigs);
+                setRollHistory(newHistory);
+              }
+            }}
           >
             <Text
               style={[
@@ -167,12 +214,6 @@ const App: React.FC = () => {
         {renderTabContent()}
       </View>
 
-      {/* Roll Result Modal */}
-      <RollResultModal
-        result={lastRoll}
-        visible={showRollResult}
-        onClose={() => setShowRollResult(false)}
-      />
     </SafeAreaView>
   );
 };

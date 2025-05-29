@@ -5,7 +5,10 @@ import { MobileStorageService } from './storage';
 export class MobileDiceService implements DiceRollService {
   rollDice(configuration: DiceConfiguration): RollResult {
     const result = rollDice(configuration);
-    this.saveRoll(result);
+    // Save roll asynchronously - don't wait for it to complete
+    this.saveRoll(result).catch(error => {
+      console.error('Error saving roll:', error);
+    });
     return result;
   }
 
