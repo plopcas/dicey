@@ -9,33 +9,27 @@ interface DiceBuilderProps {
   onSave: (name: string, dice: Die[]) => void;
   onRoll: (dice: Die[]) => void;
   lastRoll?: RollResult | null;
-  loadedConfiguration?: Die[] | null;
+  currentDice: Die[];
+  onDiceChange: (dice: Die[]) => void;
 }
 
-export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRoll, loadedConfiguration }) => {
-  const [dice, setDice] = useState<Die[]>(loadedConfiguration || []);
+export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRoll, currentDice, onDiceChange }) => {
   const [configName, setConfigName] = useState('');
   const [showSaveModal, setShowSaveModal] = useState(false);
-
-  useEffect(() => {
-    if (loadedConfiguration) {
-      setDice(loadedConfiguration);
-    }
-  }, [loadedConfiguration]);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
   const addDie = () => {
-    setDice([...dice, { sides: 6, quantity: 1 }]);
+    onDiceChange([...currentDice, { sides: 6, quantity: 1 }]);
   };
 
   const updateDie = (index: number, updates: Partial<Die>) => {
-    const newDice = [...dice];
+    const newDice = [...currentDice];
     newDice[index] = { ...newDice[index], ...updates };
-    setDice(newDice);
+    onDiceChange(newDice);
   };
 
   const removeDie = (index: number) => {
-    setDice(dice.filter((_, i) => i !== index));
+    onDiceChange(currentDice.filter((_, i) => i !== index));
   };
 
   const clearConfiguration = () => {
@@ -44,13 +38,13 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
       'Are you sure you want to clear all dice?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Clear', style: 'destructive', onPress: () => setDice([]) },
+        { text: 'Clear', style: 'destructive', onPress: () => onDiceChange([]) },
       ]
     );
   };
 
   const openSaveModal = () => {
-    if (!validateDiceConfiguration(dice)) {
+    if (!validateDiceConfiguration(currentDice)) {
       Alert.alert('Invalid Configuration', 'Please add at least one die to save');
       return;
     }
@@ -63,21 +57,21 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
       return;
     }
 
-    onSave(configName.trim(), dice);
+    onSave(configName.trim(), currentDice);
     setConfigName(''); // Only clear the name, keep the dice configuration
     setShowSaveModal(false);
     Alert.alert('Success', 'Configuration saved!');
   };
 
   const handleRoll = () => {
-    if (!validateDiceConfiguration(dice)) {
+    if (!validateDiceConfiguration(currentDice)) {
       Alert.alert('Invalid Configuration', 'Please add at least one die to roll');
       return;
     }
-    onRoll(dice);
+    onRoll(currentDice);
   };
 
-  const isValid = validateDiceConfiguration(dice);
+  const isValid = validateDiceConfiguration(currentDice);
 
   return (
     <ScrollView 
@@ -87,8 +81,6 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
     >
       {/* Top Section - Quick Roll and Last Result */}
       <View style={[styles.card, { margin: 16, marginBottom: 8 }]}>
-        <Text style={styles.sectionTitle}>Quick Roll</Text>
-        
         <Pressable
           style={({ pressed }) => [
             styles.button,
@@ -125,10 +117,10 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
           </View>
         )}
 
-        {dice.length > 0 && (
+        {currentDice.length > 0 && (
           <View style={[styles.preview, { marginTop: lastRoll ? 12 : 0, marginBottom: 0 }]}>
             <Text style={styles.previewText}>
-              {formatDiceConfiguration(dice)}
+              {formatDiceConfiguration(currentDice)}
             </Text>
           </View>
         )}
@@ -155,7 +147,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
             <Text style={styles.smallButtonText}>Save</Text>
           </Pressable>
           
-          {dice.length > 0 && (
+          {currentDice.length > 0 && (
             <Pressable
               style={({ pressed }) => [
                 styles.button,
@@ -184,7 +176,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
           </Pressable>
         </View>
 
-        {dice.length === 0 ? (
+        {currentDice.length === 0 ? (
           <View style={[styles.center, { paddingVertical: 20 }]}>
             <Text style={styles.emptyStateIcon}>🎲</Text>
             <Text style={styles.emptyStateText}>
@@ -202,7 +194,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
 
             {/* Dice List - Now part of main scroll */}
             <View style={{ paddingVertical: 8 }}>
-              {dice.map((die, index) => (
+              {currentDice.map((die, index) => (
                 <View key={index} style={[styles.row, { paddingVertical: 16, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.borderLight, minHeight: 80 }]}>
                   {/* Quantity Input */}
                   <View style={{ flex: 1, alignItems: 'center' }}>

@@ -14,7 +14,7 @@ const App: React.FC = () => {
   const [configurations, setConfigurations] = useState<DiceConfiguration[]>([]);
   const [rollHistory, setRollHistory] = useState<RollResult[]>([]);
   const [lastRoll, setLastRoll] = useState<RollResult | null>(null);
-  const [loadedConfiguration, setLoadedConfiguration] = useState<Die[] | null>(null);
+  const [currentDice, setCurrentDice] = useState<Die[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -75,7 +75,7 @@ const App: React.FC = () => {
       if ('id' in dice) {
         // Rolling a saved configuration - navigate to builder tab to show result
         result = mobileDiceService.rollDice(dice);
-        setLoadedConfiguration(dice.dice); // Load the dice configuration
+        setCurrentDice(dice.dice); // Load the dice configuration
         setActiveTab('builder');
       } else {
         // Rolling a temporary configuration
@@ -86,7 +86,7 @@ const App: React.FC = () => {
           createdAt: new Date(),
         };
         result = mobileDiceService.rollDice(tempConfig);
-        // Keep the current configuration when rolling from builder
+        setCurrentDice(dice); // Update current dice state
       }
       
       console.log('Roll result:', result);
@@ -127,7 +127,8 @@ const App: React.FC = () => {
             onSave={handleSaveConfiguration} 
             onRoll={handleRoll}
             lastRoll={lastRoll}
-            loadedConfiguration={loadedConfiguration}
+            currentDice={currentDice}
+            onDiceChange={setCurrentDice}
           />
         );
       case 'saved':

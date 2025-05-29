@@ -4,7 +4,11 @@
       "Bash(npm install)",
       "Bash(npm start)",
       "Bash(npm install:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(rm:*)",
+      "Bash(git add:*)",
+      "Bash(git rm:*)",
+      "Bash(git push:*)"
     ]
   },
   "enableAllProjectMcpServers": false
