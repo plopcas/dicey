@@ -175,6 +175,7 @@ const AppContent: React.FC = () => {
             lastRoll={lastRoll}
             currentDice={currentDice}
             onDiceChange={setCurrentDice}
+            onClearLastRoll={() => setLastRoll(null)}
             isRolling={isRolling}
           />
         );

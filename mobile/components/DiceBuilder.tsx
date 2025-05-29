@@ -12,10 +12,11 @@ interface DiceBuilderProps {
   lastRoll?: RollResult | null;
   currentDice: Die[];
   onDiceChange: (dice: Die[]) => void;
+  onClearLastRoll?: () => void;
   isRolling?: boolean;
 }
 
-export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRoll, currentDice, onDiceChange, isRolling }) => {
+export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRoll, currentDice, onDiceChange, onClearLastRoll, isRolling }) => {
   const { settings } = useSettings();
   const [configName, setConfigName] = useState('');
   const [showSaveModal, setShowSaveModal] = useState(false);
@@ -53,7 +54,14 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
       'Are you sure you want to clear all dice?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Clear', style: 'destructive', onPress: () => onDiceChange([]) },
+        { 
+          text: 'Clear', 
+          style: 'destructive', 
+          onPress: () => {
+            onDiceChange([]);
+            onClearLastRoll?.();
+          }
+        },
       ]
     );
   };
@@ -193,37 +201,49 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
                 {lastRoll.total}
               </Text>
             </View>
-            <View style={styles.individualRolls}>
-              {lastRoll.results.map((dieGroup, dieIndex) => 
-                dieGroup.map((roll, rollIndex) => {
-                  const modifier = lastRoll.modifiers ? lastRoll.modifiers[dieIndex] : 0;
-                  const hasModifier = settings.modifiersEnabled && modifier !== 0;
-                  const modifiedTotal = roll + modifier;
-                  
-                  if (hasModifier) {
-                    return (
-                      <Text 
-                        key={`${dieIndex}-${rollIndex}`} 
-                        style={[
-                          styles.rollValue,
-                          {
-                            backgroundColor: modifier > 0 ? colors.success : colors.danger,
-                          }
-                        ]}
-                      >
-                        {modifiedTotal}({roll}{modifier > 0 ? '+' : ''}{modifier})
-                      </Text>
-                    );
-                  } else {
-                    return (
-                      <Text key={`${dieIndex}-${rollIndex}`} style={styles.rollValue}>
-                        {roll}
-                      </Text>
-                    );
-                  }
-                })
-              )}
-            </View>
+            {(() => {
+              // Calculate total number of dice and if any modifiers are applied
+              const totalDiceCount = lastRoll.results.reduce((sum, dieGroup) => sum + dieGroup.length, 0);
+              const hasAnyModifiers = lastRoll.modifiers && settings.modifiersEnabled && 
+                lastRoll.modifiers.some(modifier => modifier !== 0);
+              
+              // Show individual dice only if more than 1 die total OR modifiers are applied
+              const shouldShowIndividualDice = totalDiceCount > 1 || hasAnyModifiers;
+              
+              return shouldShowIndividualDice ? (
+                <View style={styles.individualRolls}>
+                  {lastRoll.results.map((dieGroup, dieIndex) => 
+                    dieGroup.map((roll, rollIndex) => {
+                      const modifier = lastRoll.modifiers ? lastRoll.modifiers[dieIndex] : 0;
+                      const hasModifier = settings.modifiersEnabled && modifier !== 0;
+                      const modifiedTotal = roll + modifier;
+                      
+                      if (hasModifier) {
+                        return (
+                          <Text 
+                            key={`${dieIndex}-${rollIndex}`} 
+                            style={[
+                              styles.rollValue,
+                              {
+                                backgroundColor: modifier > 0 ? colors.success : colors.danger,
+                              }
+                            ]}
+                          >
+                            {modifiedTotal}({roll}{modifier > 0 ? '+' : ''}{modifier})
+                          </Text>
+                        );
+                      } else {
+                        return (
+                          <Text key={`${dieIndex}-${rollIndex}`} style={styles.rollValue}>
+                            {roll}
+                          </Text>
+                        );
+                      }
+                    })
+                  )}
+                </View>
+              ) : null;
+            })()}
           </View>
         )}
 

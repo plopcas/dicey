@@ -212,6 +212,7 @@ const AppContent: React.FC = () => {
                     onRoll={handleRoll}
                     currentDice={currentDice}
                     onDiceChange={setCurrentDice}
+                    onClearLastRoll={() => setLastRoll(null)}
                   />
                 </div>
               </>

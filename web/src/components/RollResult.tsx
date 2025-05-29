@@ -36,34 +36,46 @@ export const RollResult: React.FC<RollResultProps> = ({ result, onRoll, currentD
             <div className="total-value" style={{ fontSize: '4rem', textAlign: 'center' }}>{result.total}</div>
           </div>
 
-          <div className="dice-results">
-            {result.results.map((dieGroup, dieIndex) => (
-              <div key={dieIndex} className="die-group-results">
-                {dieGroup.map((roll, rollIndex) => {
-                  const modifier = result.modifiers[dieIndex];
-                  const hasModifier = modifiersEnabled && modifier !== 0;
-                  const modifiedTotal = roll + modifier;
-                  
-                  if (hasModifier) {
-                    return (
-                      <span 
-                        key={rollIndex} 
-                        className={`roll-value modifier ${modifier > 0 ? 'positive' : 'negative'}`}
-                      >
-                        {modifiedTotal}({roll}{modifier > 0 ? '+' : ''}{modifier})
-                      </span>
-                    );
-                  } else {
-                    return (
-                      <span key={rollIndex} className="roll-value">
-                        {roll}
-                      </span>
-                    );
-                  }
-                })}
+          {(() => {
+            // Calculate total number of dice and if any modifiers are applied
+            const totalDiceCount = result.results.reduce((sum, dieGroup) => sum + dieGroup.length, 0);
+            const hasAnyModifiers = result.modifiers && modifiersEnabled && 
+              result.modifiers.some(modifier => modifier !== 0);
+            
+            // Show individual dice only if more than 1 die total OR modifiers are applied
+            const shouldShowIndividualDice = totalDiceCount > 1 || hasAnyModifiers;
+            
+            return shouldShowIndividualDice ? (
+              <div className="dice-results">
+                {result.results.map((dieGroup, dieIndex) => (
+                  <div key={dieIndex} className="die-group-results">
+                    {dieGroup.map((roll, rollIndex) => {
+                      const modifier = result.modifiers[dieIndex];
+                      const hasModifier = modifiersEnabled && modifier !== 0;
+                      const modifiedTotal = roll + modifier;
+                      
+                      if (hasModifier) {
+                        return (
+                          <span 
+                            key={rollIndex} 
+                            className={`roll-value modifier ${modifier > 0 ? 'positive' : 'negative'}`}
+                          >
+                            {modifiedTotal}({roll}{modifier > 0 ? '+' : ''}{modifier})
+                          </span>
+                        );
+                      } else {
+                        return (
+                          <span key={rollIndex} className="roll-value">
+                            {roll}
+                          </span>
+                        );
+                      }
+                    })}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            ) : null;
+          })()}
 
           <div className="roll-timestamp">
             {result.timestamp.toLocaleString()}

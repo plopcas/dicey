@@ -8,9 +8,10 @@ interface DiceBuilderProps {
   onRoll: (dice: Die[]) => void;
   currentDice: Die[];
   onDiceChange: (dice: Die[]) => void;
+  onClearLastRoll?: () => void;
 }
 
-export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, currentDice, onDiceChange }) => {
+export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, currentDice, onDiceChange, onClearLastRoll }) => {
   const { modifiersEnabled } = useSettings();
   const [configName, setConfigName] = useState('');
   const [showSaveModal, setShowSaveModal] = useState(false);
@@ -36,6 +37,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, curren
   const clearConfiguration = () => {
     if (window.confirm('Are you sure you want to clear all dice?')) {
       onDiceChange([]);
+      onClearLastRoll?.();
     }
   };
 
