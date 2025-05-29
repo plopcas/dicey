@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import { RollResult } from '../shared/types';
-import { formatDiceConfiguration } from '../shared/utils';
 import { useSettings } from '../contexts/SettingsContext';
 import { styles, colors } from '../styles/styles';
 
@@ -19,7 +18,7 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
       'Are you sure you want to clear all roll history? This action cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Clear all', style: 'destructive', onPress: onClear },
+        { text: 'Clear', style: 'destructive', onPress: onClear },
       ]
     );
   };
@@ -64,7 +63,7 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
             ]}
             onPress={handleClear}
           >
-            <Text style={styles.smallButtonText}>Clear all</Text>
+            <Text style={styles.smallButtonText}>Clear</Text>
           </Pressable>
         </View>
         
@@ -81,10 +80,6 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
                   </Text>
                 </View>
               </View>
-              
-              <Text style={styles.listItemSubtitle}>
-                {formatDiceConfiguration(roll.dice)}
-              </Text>
               
               <View style={{ marginVertical: 8 }}>
                 {roll.dice.map((die, dieIndex) => (
@@ -124,10 +119,6 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
                   </View>
                 ))}
               </View>
-              
-              <Text style={styles.listItemMeta}>
-                {roll.configurationName !== 'Quick Roll' ? roll.configurationName : formatDiceConfiguration(roll.dice)}
-              </Text>
             </View>
           ))}
         </View>

@@ -122,14 +122,14 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, curren
           </div>
         ) : (
           <>
-            <div className="dice-table-header">
+            <div className={`dice-table-header ${modifiersEnabled ? 'with-modifiers' : 'without-modifiers'}`}>
               <span>Qty</span>
               <span>Die type</span>
               {modifiersEnabled && <span>Modifier</span>}
               <span>Action</span>
             </div>
             {currentDice.map((die, index) => (
-              <div key={index} className="die-config">
+              <div key={index} className={`die-config ${modifiersEnabled ? 'with-modifiers' : 'without-modifiers'}`}>
                 <input
                   type="number"
                   min="1"

@@ -80,19 +80,20 @@ export const SavedConfigurations: React.FC<SavedConfigurationsProps> = ({
                   ]}
                   onPress={() => onRoll(config)}
                 >
-                  <Text style={styles.buttonText}>🎲 Roll</Text>
+                  <Text style={styles.buttonText}>Roll</Text>
                 </Pressable>
                 
                 <Pressable
                   style={({ pressed }) => [
                     styles.button,
                     styles.dangerButton,
-                    { paddingHorizontal: 16 },
+                    styles.flex1,
+                    { marginLeft: 8 },
                     pressed && styles.dangerButtonPressed,
                   ]}
                   onPress={() => handleDelete(config)}
                 >
-                  <Text style={[styles.buttonText, { fontSize: 16 }]}>×</Text>
+                  <Text style={[styles.buttonText, { fontSize: 16 }]}>Remove</Text>
                 </Pressable>
               </View>
             </View>

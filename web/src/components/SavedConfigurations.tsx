@@ -38,7 +38,12 @@ export const SavedConfigurations: React.FC<SavedConfigurationsProps> = ({
             <div className="config-actions">
               <button
                 onClick={() => onRoll(config)}
-                className="roll-btn primary"
+                className="btn btn-primary"
+                style={{ 
+                  backgroundColor: '#667eea',
+                  borderColor: '#667eea',
+                  color: 'white'
+                }}
               >
                 Roll
               </button>
@@ -48,9 +53,9 @@ export const SavedConfigurations: React.FC<SavedConfigurationsProps> = ({
                     onDelete(config.id);
                   }
                 }}
-                className="delete-btn danger"
+                className="btn btn-danger"
               >
-                ×
+                Remove
               </button>
             </div>
           </div>

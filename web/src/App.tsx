@@ -142,32 +142,13 @@ const AppContent: React.FC = () => {
   return (
     <div className="app">
       <header className="app-header">
-        <div style={{ position: 'relative', width: '100%' }}>
-          <div style={{ textAlign: 'center' }}>
-            <h1>🎲 Dicey</h1>
-            <p>Your digital dice rolling companion</p>
-          </div>
-          <button 
-            className="settings-gear"
-            onClick={() => setShowSettings(!showSettings)}
-            style={{
-              position: 'absolute',
-              top: '0',
-              right: '0',
-              background: 'none',
-              border: 'none',
-              color: 'white',
-              fontSize: '24px',
-              cursor: 'pointer',
-              padding: '8px'
-            }}
-          >
-            ⚙
-          </button>
+        <div style={{ textAlign: 'center' }}>
+          <h1>🎲 Dicey</h1>
+          <p>Your digital dice rolling companion</p>
         </div>
       </header>
 
-      <nav className="app-nav">
+      <nav className="app-nav" style={{ position: 'relative' }}>
         <button
           className={`nav-btn ${activeTab === 'builder' ? 'active' : ''}`}
           onClick={() => setActiveTab('builder')}
@@ -191,6 +172,25 @@ const AppContent: React.FC = () => {
           onClick={() => setActiveTab('statistics')}
         >
           Statistics
+        </button>
+        <button 
+          className="settings-gear"
+          onClick={() => setShowSettings(!showSettings)}
+          style={{
+            position: 'absolute',
+            top: '50%',
+            right: '16px',
+            transform: 'translateY(-50%)',
+            background: 'none',
+            border: 'none',
+            color: 'black',
+            fontSize: '20px',
+            cursor: 'pointer',
+            padding: '8px',
+            borderRadius: '4px'
+          }}
+        >
+          ⚙
         </button>
       </nav>
 
@@ -238,44 +238,61 @@ const AppContent: React.FC = () => {
       
       {/* Settings Dropdown */}
       {showSettings && (
-        <div 
-          style={{
-            position: 'fixed',
-            top: '80px',
-            right: '20px',
-            backgroundColor: 'white',
-            border: '1px solid #ddd',
-            borderRadius: '8px',
-            padding: '16px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            zIndex: 1000,
-            minWidth: '200px'
-          }}
-        >
-          <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Settings</h3>
+        <>
+          {/* Backdrop to handle outside clicks */}
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 999
+            }}
+            onClick={() => setShowSettings(false)}
+          />
           
-          <div style={{ marginBottom: '12px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-              <input 
-                type="checkbox" 
-                checked={soundEnabled} 
-                onChange={(e) => setSoundEnabled(e.target.checked)}
-              />
-              Sound effects
-            </label>
+          {/* Settings dropdown */}
+          <div 
+            style={{
+              position: 'fixed',
+              top: '120px',
+              right: '20px',
+              backgroundColor: 'white',
+              border: '1px solid #ddd',
+              borderRadius: '8px',
+              padding: '16px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              zIndex: 1000,
+              minWidth: '200px'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Settings</h3>
+            
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <input 
+                  type="checkbox" 
+                  checked={soundEnabled} 
+                  onChange={(e) => setSoundEnabled(e.target.checked)}
+                />
+                Sound effects
+              </label>
+            </div>
+            
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <input 
+                  type="checkbox" 
+                  checked={modifiersEnabled} 
+                  onChange={(e) => setModifiersEnabled(e.target.checked)}
+                />
+                Modifiers
+              </label>
+            </div>
           </div>
-          
-          <div style={{ marginBottom: '12px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-              <input 
-                type="checkbox" 
-                checked={modifiersEnabled} 
-                onChange={(e) => setModifiersEnabled(e.target.checked)}
-              />
-              Modifiers
-            </label>
-          </div>
-        </div>
+        </>
       )}
     </div>
   );

@@ -606,7 +606,6 @@ body {
 /* Dice table */
 .dice-table-header {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 80px;
   gap: 1rem;
   padding: 0.75rem;
   background: #f8f9fa;
@@ -616,15 +615,34 @@ body {
   text-align: center;
 }
 
+/* With modifiers enabled */
+.dice-table-header.with-modifiers {
+  grid-template-columns: 80px 1fr 120px 60px;
+}
+
+/* Without modifiers */
+.dice-table-header.without-modifiers {
+  grid-template-columns: 80px 1fr 60px;
+}
+
 .die-config {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 80px;
   gap: 1rem;
   padding: 1rem;
   background: #f8f9fa;
   border-radius: 8px;
   margin-bottom: 1rem;
   align-items: center;
+}
+
+/* With modifiers enabled */
+.die-config.with-modifiers {
+  grid-template-columns: 80px 1fr 120px 60px;
+}
+
+/* Without modifiers */
+.die-config.without-modifiers {
+  grid-template-columns: 80px 1fr 60px;
 }
 
 .die-config input,

@@ -1,6 +1,5 @@
 import React from 'react';
 import { RollResult } from '../shared/types';
-import { formatDiceConfiguration } from '../shared/utils';
 
 interface RollHistoryProps {
   history: RollResult[];
@@ -35,7 +34,7 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
           }}
           className="btn btn-danger"
         >
-          Clear all
+          Clear
         </button>
       </div>
 
@@ -69,10 +68,6 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
                   </div>
                 </div>
               ))}
-            </div>
-            
-            <div className="roll-meta">
-              {roll.configurationName !== 'Quick Roll' ? roll.configurationName : formatDiceConfiguration(roll.dice)}
             </div>
           </div>
         ))}
