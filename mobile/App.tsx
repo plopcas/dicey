@@ -16,6 +16,7 @@ const App: React.FC = () => {
   const [lastRoll, setLastRoll] = useState<RollResult | null>(null);
   const [currentDice, setCurrentDice] = useState<Die[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRolling, setIsRolling] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -69,7 +70,12 @@ const App: React.FC = () => {
 
   const handleRoll = async (dice: Die[] | DiceConfiguration) => {
     try {
+      setIsRolling(true);
       console.log('Rolling dice:', dice);
+      
+      // Add a delay for animation effect
+      await new Promise(resolve => setTimeout(resolve, 400));
+      
       let result: RollResult;
       
       if ('id' in dice) {
@@ -96,6 +102,8 @@ const App: React.FC = () => {
       setRollHistory(prev => [result, ...prev]);
     } catch (error) {
       console.error('Error rolling dice:', error);
+    } finally {
+      setIsRolling(false);
     }
   };
 
@@ -128,6 +136,7 @@ const App: React.FC = () => {
             lastRoll={lastRoll}
             currentDice={currentDice}
             onDiceChange={setCurrentDice}
+            isRolling={isRolling}
           />
         );
       case 'saved':

@@ -11,9 +11,10 @@ interface DiceBuilderProps {
   lastRoll?: RollResult | null;
   currentDice: Die[];
   onDiceChange: (dice: Die[]) => void;
+  isRolling?: boolean;
 }
 
-export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRoll, currentDice, onDiceChange }) => {
+export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRoll, currentDice, onDiceChange, isRolling }) => {
   const [configName, setConfigName] = useState('');
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showCustomDieModal, setShowCustomDieModal] = useState(false);
@@ -109,15 +110,15 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
           style={({ pressed }) => [
             styles.button,
             styles.primaryButton,
-            !isValid && styles.disabledButton,
-            pressed && isValid && styles.primaryButtonPressed,
+            (!isValid || isRolling) && styles.disabledButton,
+            pressed && isValid && !isRolling && styles.primaryButtonPressed,
             { marginBottom: 16 }
           ]}
           onPress={handleRoll}
-          disabled={!isValid}
+          disabled={!isValid || isRolling}
         >
           <Text style={styles.buttonText}>
-            {isValid ? '🎲 Roll Dice' : 'Add dice below to roll'}
+            {isRolling ? '🎲 Rolling...' : isValid ? '🎲 Roll Dice' : 'Add dice below to roll'}
           </Text>
         </Pressable>
 

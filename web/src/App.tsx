@@ -105,7 +105,7 @@ const App: React.FC = () => {
       playDiceSound();
       
       // Add a delay for animation effect
-      await new Promise(resolve => setTimeout(resolve, 600));
+      await new Promise(resolve => setTimeout(resolve, 400));
       
       let result: RollResult;
       

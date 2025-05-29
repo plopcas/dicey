@@ -101,7 +101,7 @@ export const RollHistory: React.FC<RollHistoryProps> = ({ history, onClear }) =>
               </View>
               
               <Text style={styles.listItemMeta}>
-                {roll.configurationName}
+                {roll.configurationName !== 'Quick Roll' ? roll.configurationName : formatDiceConfiguration(roll.dice)}
               </Text>
             </View>
           ))}
