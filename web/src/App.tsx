@@ -9,6 +9,7 @@ import { Statistics } from './components/Statistics';
 import { SettingsProvider, useSettings } from './contexts/SettingsContext';
 import { validateDiceConfiguration } from './shared/utils';
 import './App.css';
+// Trigger GitHub Pages deployment
 
 type Tab = 'roll' | 'saved' | 'history' | 'statistics';
 
