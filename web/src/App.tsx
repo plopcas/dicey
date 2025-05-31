@@ -60,16 +60,63 @@ const AppContent: React.FC = () => {
   };
 
   // Create dice roll sound effect
-  const playDiceSound = () => {
-    if (!soundEnabled) return;
+  const playDiceSound = async () => {
+    if (!soundEnabled) {
+      console.log('Sound is disabled in settings');
+      return;
+    }
     try {
-      const audio = new Audio('/dice-142528.mp3');
+      console.log('Attempting to play dice sound...');
+      
+      // First, test if the file is accessible  
+      // Account for GitHub Pages homepage setting in development
+      const basePath = process.env.NODE_ENV === 'development' ? '/dicey' : (process.env.PUBLIC_URL || '');
+      const audioPath = `${basePath}/dice-142528.mp3`;
+      console.log('Testing audio path:', audioPath);
+      
+      // Try to fetch the file first to check if it exists
+      try {
+        const response = await fetch(audioPath, { method: 'HEAD' });
+        console.log('Fetch response status:', response.status);
+        console.log('Fetch response headers:', Array.from(response.headers.entries()));
+        
+        const contentType = response.headers.get('content-type');
+        console.log('Content-Type:', contentType);
+        
+        if (!response.ok) {
+          console.error('Audio file not found or not accessible');
+          return;
+        }
+        
+        // Check if we're getting the wrong content type (HTML instead of audio)
+        if (contentType && !contentType.includes('audio') && !contentType.includes('mpeg')) {
+          console.error('Server is serving wrong content type:', contentType);
+          console.log('This usually means the React dev server is serving index.html instead of the MP3 file');
+          return;
+        }
+      } catch (fetchError) {
+        console.error('Fetch failed:', fetchError);
+        return;
+      }
+      
+      const audio = new Audio(audioPath);
       audio.volume = 0.5;
-      audio.play().catch(error => {
-        console.log('Audio play failed:', error);
+      
+      // Handle load events
+      audio.addEventListener('loadstart', () => console.log('Audio loading started'));
+      audio.addEventListener('canplay', () => console.log('Audio can play'));
+      audio.addEventListener('error', (e) => console.error('Audio error:', e));
+      
+      audio.play().then(() => {
+        console.log('Audio played successfully');
+      }).catch(error => {
+        console.error('Audio play failed:', error);
+        if (error.name === 'NotAllowedError') {
+          console.log('Audio playback was prevented by browser policy. User interaction required.');
+        }
       });
     } catch (error) {
-      console.log('Audio not supported');
+      console.error('Audio not supported or failed to create:', error);
     }
   };
 
@@ -96,7 +143,7 @@ const AppContent: React.FC = () => {
   const handleRoll = async (dice: Die[] | DiceConfiguration) => {
     try {
       setIsRolling(true);
-      playDiceSound();
+      await playDiceSound();
       
       // Add a delay for animation effect
       await new Promise(resolve => setTimeout(resolve, 400));
