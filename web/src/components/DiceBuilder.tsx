@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Die, DICE_TYPES } from '../shared/types';
-import { formatDiceConfiguration, validateDiceConfiguration } from '../shared/utils';
+import { validateDiceConfiguration } from '../shared/utils';
 import { useSettings } from '../contexts/SettingsContext';
 
 interface DiceBuilderProps {
@@ -79,11 +79,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, curren
     }
   };
 
-  const handleRoll = () => {
-    if (validateDiceConfiguration(currentDice)) {
-      onRoll(currentDice);
-    }
-  };
+  // Removed unused handleRoll function - rolling is handled by parent component
 
   const isValid = validateDiceConfiguration(currentDice);
 

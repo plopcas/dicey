@@ -34,7 +34,7 @@ const AppContent: React.FC = () => {
       event.preventDefault();
       handleRoll(currentDice);
     }
-  }, [activeTab, currentDice]);
+  }, [activeTab, currentDice, handleRoll]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyPress);
