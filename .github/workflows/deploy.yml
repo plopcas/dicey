@@ -43,6 +43,14 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node-
         
+    - name: Verify package-lock.json
+      run: |
+        if [ ! -f web/package-lock.json ]; then
+          echo "Error: package-lock.json is missing."
+          exit 1
+        fi
+        echo "package-lock.json found"
+        
     - name: Install dependencies
       run: |
         cd web
