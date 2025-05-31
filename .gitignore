@@ -7,7 +7,7 @@ yarn-error.log*
 lerna-debug.log*
 
 # Package lock files (choose one approach)
-package-lock.json
+# package-lock.json  # Needed for GitHub Actions deployment
 yarn.lock
 
 # Runtime data
