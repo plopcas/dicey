@@ -2,6 +2,7 @@
   "name": "dicey-web",
   "version": "1.0.0",
   "private": true,
+  "homepage": "https://plopcas.github.io/dicey",
   "dependencies": {
     "@types/node": "^20.0.0",
     "@types/react": "^18.0.0",
