@@ -34,7 +34,7 @@ const AppContent: React.FC = () => {
       event.preventDefault();
       handleRoll(currentDice);
     }
-  }, [activeTab, currentDice, handleRoll]);
+  }, [activeTab, currentDice]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyPress);
