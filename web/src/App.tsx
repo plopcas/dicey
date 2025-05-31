@@ -62,7 +62,6 @@ const AppContent: React.FC = () => {
   // Create dice roll sound effect
   const playDiceSound = async () => {
     if (!soundEnabled) {
-      console.log('Sound is disabled in settings');
       return;
     }
     try {
