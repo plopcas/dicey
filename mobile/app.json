@@ -4,6 +4,7 @@
     "slug": "dicey-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./app-icon.svg",
     "userInterfaceStyle": "light",
     "description": "A modern dice rolling app for tabletop gaming with custom configurations and roll history.",
     "privacy": "public",
@@ -27,6 +28,7 @@
       "targetSdkVersion": 34,
       "permissions": [],
       "adaptiveIcon": {
+        "foregroundImage": "./app-icon.svg",
         "backgroundColor": "#667eea"
       },
       "playStoreUrl": "https://play.google.com/store/apps/details?id=com.dicey.mobile",
