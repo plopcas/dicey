@@ -12,7 +12,8 @@
       "Bash(npx tsc:*)",
       "Bash(npm run build:*)",
       "Bash(npx expo install:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(magick:*)"
     ]
   },
   "enableAllProjectMcpServers": false
