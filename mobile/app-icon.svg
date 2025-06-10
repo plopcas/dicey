@@ -4,12 +4,12 @@
   
   <!-- 6 dots arranged in two columns (like a traditional 6-sided die) -->
   <!-- Left column -->
-  <circle cx="350" cy="280" r="45" fill="white"/>
-  <circle cx="350" cy="512" r="45" fill="white"/>
-  <circle cx="350" cy="744" r="45" fill="white"/>
+  <circle cx="400" cy="340" r="45" fill="white"/>
+  <circle cx="400" cy="512" r="45" fill="white"/>
+  <circle cx="400" cy="684" r="45" fill="white"/>
   
   <!-- Right column -->
-  <circle cx="674" cy="280" r="45" fill="white"/>
-  <circle cx="674" cy="512" r="45" fill="white"/>
-  <circle cx="674" cy="744" r="45" fill="white"/>
+  <circle cx="624" cy="340" r="45" fill="white"/>
+  <circle cx="624" cy="512" r="45" fill="white"/>
+  <circle cx="624" cy="684" r="45" fill="white"/>
 </svg>
