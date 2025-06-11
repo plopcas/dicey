@@ -347,7 +347,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
                       onPress={() => openQuantityModal(index)}
                     >
                       <Text style={{ 
-                        fontSize: 18, 
+                        fontSize: 14, 
                         fontWeight: '600', 
                         color: colors.text
                       }}>
@@ -371,7 +371,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
                         }
                       ]}
                     >
-                      <Text style={[styles.previewText, { fontSize: 18, fontWeight: '600', color: colors.primary }]}>
+                      <Text style={[styles.previewText, { fontSize: 14, fontWeight: '600', color: colors.text }]}>
                         D{die.sides} ▼
                       </Text>
                       <Picker
@@ -420,7 +420,7 @@ export const DiceBuilder: React.FC<DiceBuilderProps> = ({ onSave, onRoll, lastRo
                         onPress={() => openModifierModal(index)}
                       >
                         <Text style={{ 
-                          fontSize: 18, 
+                          fontSize: 14, 
                           fontWeight: '600', 
                           color: (die.modifier || 0) === 0 ? colors.textLight : colors.text 
                         }}>
